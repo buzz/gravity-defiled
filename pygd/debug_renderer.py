@@ -1,4 +1,4 @@
-from pyglet.window import FPSDisplay, key, Window
+from pyglet.window import FPSDisplay, Window
 import pyglet.gl as gl
 import pymunk.pyglet_util
 
@@ -16,12 +16,20 @@ class DebugRendererWindow(Window):
     def on_draw(self):
         self.clear()
 
-        # Invert y axis
         self.camera.project()
+
+        # Invert y axis
         gl.glPushMatrix()
         gl.glScalef(1.0, -1.0, 1.0)
         gl.glTranslatef(0.0, -self.height, 0.0)
+
+        # Translate objects to viewport center
+        gl.glPushMatrix()
+        gl.glTranslatef(self.camera.x, self.camera.y, 0.0)
+
         self.space.debug_draw(self.draw_options)
+
+        gl.glPopMatrix()
         gl.glPopMatrix()
 
         self.camera.project_hud()
