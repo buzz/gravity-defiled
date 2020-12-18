@@ -3,9 +3,9 @@ from pymunk.vec2d import Vec2d
 
 
 class Bike:
-    JOINT_BREAK_THRESHOLD = 800000
-    ACCEL_ANG_VEL = 1.9
-    MAX_ANG_VEL = 30.0
+    JOINT_BREAK_THRESHOLD = 700000
+    ACCEL_ANG_VEL = 1.5
+    MAX_ANG_VEL = 24.0
     BRAKE_FACTOR = 0.7
 
     WHEEL_RADIUS = 20.5
@@ -21,9 +21,11 @@ class Bike:
     WHEEL_R_MASS = 8
 
     FRAME_FRICTION = 0.1
-    FRAME_POINT_TOP = Vec2d(31, -36)
-    FRAME_POINT_BOT_R = Vec2d(10, 3.55)
-    FRAME_POINT_BOT_L = Vec2d(-18, 0.55)
+    FRAME_POINTS = (
+        Vec2d(31, -36),
+        Vec2d(10, 3.55),
+        Vec2d(-18, 0.55),
+    )
 
     def __init__(self, start_pos, space):
         self.space = space
@@ -72,15 +74,10 @@ class Bike:
         self.space.add(self.wheel_r_body, self.wheel_r_shape)
 
     def create_frame(self):
-        frame_points = (
-            self.FRAME_POINT_BOT_L,
-            self.FRAME_POINT_TOP,
-            self.FRAME_POINT_BOT_R,
-        )
         frame_mass = 3
-        moment = pymunk.moment_for_poly(frame_mass, frame_points)
+        moment = pymunk.moment_for_poly(frame_mass, self.FRAME_POINTS)
         self.frame_body = pymunk.Body(frame_mass, moment)
-        self.frame_shape = pymunk.Poly(self.frame_body, frame_points)
+        self.frame_shape = pymunk.Poly(self.frame_body, self.FRAME_POINTS)
         self.frame_shape.friction = self.FRAME_FRICTION
         self.frame_shape.color = 128, 128, 128, 255
         self.frame_body.position = self.start_pos
@@ -102,7 +99,7 @@ class Bike:
             ),
             # Right wheel to bottom frame
             pymunk.SlideJoint(
-                self.wheel_r_body, self.frame_body, (0, 0), (0, 0), 44, 45
+                self.wheel_r_body, self.frame_body, (0, 0), (0, 0), 40, 42
             ),
             # Right wheel to top frame
             pymunk.SlideJoint(
