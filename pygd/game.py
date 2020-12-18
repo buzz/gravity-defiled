@@ -13,6 +13,7 @@ class PyGd:
     SCREEN_SIZE = (1600, 900)
 
     def __init__(self):
+        self.timestep = 1.0 / self.FPS
         self.space = pymunk.Space()
         self.space.damping = self.DAMPING
         self.space.gravity = 0, 900
@@ -26,8 +27,7 @@ class PyGd:
         self.braking = False
 
     def run(self):
-
-        pyglet.clock.schedule_interval(self.step, 1.0 / self.FPS)
+        pyglet.clock.schedule_interval(self.step, self.timestep)
 
         points = (
             (-200, 880),
@@ -49,6 +49,6 @@ class PyGd:
 
         pyglet.app.run()
 
-    def step(self, dt):
-        self.bike.update(self)
-        self.space.step(1.0 / self.FPS)
+    def step(self, _):
+        self.bike.update(self, self.timestep)
+        self.space.step(self.timestep)
