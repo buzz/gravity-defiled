@@ -4,8 +4,9 @@ import pymunk.pyglet_util
 
 
 class DebugRendererWindow(Window):
-    def __init__(self, size, space):
+    def __init__(self, size, camera, space):
         super().__init__(size[0], size[1], caption="Gravity Defied")
+        self.camera = camera
         self.space = space
         self.draw_options = pymunk.pyglet_util.DrawOptions()
         self.fps_display = FPSDisplay(window=self)
@@ -16,10 +17,12 @@ class DebugRendererWindow(Window):
         self.clear()
 
         # Invert y axis
+        self.camera.project()
         gl.glPushMatrix()
         gl.glScalef(1.0, -1.0, 1.0)
         gl.glTranslatef(0.0, -self.height, 0.0)
         self.space.debug_draw(self.draw_options)
         gl.glPopMatrix()
 
+        self.camera.project_hud()
         self.fps_display.draw()

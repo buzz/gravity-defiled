@@ -2,6 +2,7 @@ import pyglet
 import pymunk
 
 from pygd.bike import Bike
+from pygd.camera import Camera
 from pygd.debug_renderer import DebugRendererWindow
 from pygd.input_handler import KeyboardInputHandler
 from pygd.track import Track
@@ -19,7 +20,8 @@ class PyGd:
         self.space.gravity = 0, 900
         self.space.sleep_time_threshold = 0.3
 
-        self.renderer = DebugRendererWindow(self.SCREEN_SIZE, self.space)
+        self.camera = Camera(*self.SCREEN_SIZE)
+        self.renderer = DebugRendererWindow(self.SCREEN_SIZE, self.camera, self.space)
         self.key_listener = KeyboardInputHandler(self, self.renderer)
 
         # input states
@@ -47,8 +49,10 @@ class PyGd:
         self.track = Track.from_points(points, self.space)
         self.bike = Bike(pymunk.Vec2d(100, 860), self.space)
 
+        self.step(self.timestep)
         pyglet.app.run()
 
     def step(self, _):
         self.bike.update(self, self.timestep)
+        self.camera.update(self.bike.frame_body.position)
         self.space.step(self.timestep)
