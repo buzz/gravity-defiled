@@ -10,7 +10,6 @@ class Bike:
 
     WHEEL_RADIUS = 20.5
     WHEEL_RADIUS_INNER = 14.1
-    WHEEL_COLOR = 90, 200, 20, 255
     WHEEL_FRICTION = 3.4
     WHEEL_ELASTICITY = 0.5
 
@@ -56,7 +55,6 @@ class Bike:
         self.wheel_l_shape = pymunk.Circle(self.wheel_l_body, self.WHEEL_RADIUS)
         self.wheel_l_shape.friction = self.WHEEL_FRICTION
         self.wheel_l_shape.elasticity = self.WHEEL_ELASTICITY
-        self.wheel_l_shape.color = self.WHEEL_COLOR
         self.wheel_l_body.position = self.start_pos + self.WHEEL_L_POS
         self.wheel_l_shape.filter = self.filter_group
         self.space.add(self.wheel_l_body, self.wheel_l_shape)
@@ -68,7 +66,6 @@ class Bike:
         self.wheel_r_shape = pymunk.Circle(self.wheel_r_body, self.WHEEL_RADIUS)
         self.wheel_r_shape.friction = self.WHEEL_FRICTION
         self.wheel_l_shape.elasticity = self.WHEEL_ELASTICITY
-        self.wheel_r_shape.color = self.WHEEL_COLOR
         self.wheel_r_body.position = self.start_pos + self.WHEEL_R_POS
         self.wheel_r_shape.filter = self.filter_group
         self.space.add(self.wheel_r_body, self.wheel_r_shape)
@@ -79,7 +76,6 @@ class Bike:
         self.frame_body = pymunk.Body(frame_mass, moment)
         self.frame_shape = pymunk.Poly(self.frame_body, self.FRAME_POINTS)
         self.frame_shape.friction = self.FRAME_FRICTION
-        self.frame_shape.color = 128, 128, 128, 255
         self.frame_body.position = self.start_pos
         self.frame_shape.filter = self.filter_group
         self.space.add(self.frame_body, self.frame_shape)
