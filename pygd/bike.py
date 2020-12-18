@@ -8,7 +8,7 @@ class Bike:
 
     wheel_radius = 24.5
     wheel_radius_inner = 20.0
-    wheel_color = 52, 219, 119, 255
+    wheel_color = 90, 200, 20, 255
     wheel_friction = 1.4
     wheel_elasticity = 0.5
 
@@ -73,6 +73,10 @@ class Bike:
         space.add(joint_front_bottom)
 
     def update(self, game):
+        self.handle_left_wheel(game)
+        # self.check_joint_forces()
+
+    def handle_left_wheel(self, game):
         if game.accelerating:
             self.wheel_l_body.angular_velocity += self.accel_ang_vel
         if game.braking and abs(self.wheel_l_body.angular_velocity) > 0.15:
@@ -82,3 +86,6 @@ class Bike:
             self.wheel_l_body.angular_velocity = self.max_ang_vel
         elif self.wheel_l_body.angular_velocity < -self.max_ang_vel:
             self.wheel_l_body.angular_velocity = -self.max_ang_vel
+
+    # def check_joint_forces(self):
+    #     print()

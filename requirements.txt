@@ -1,2 +1,2 @@
-pygame==2.0.0
+pyglet==1.5.11
 pymunk==6.0.0
