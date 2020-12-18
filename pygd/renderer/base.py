@@ -39,5 +39,5 @@ class BaseWindow(Window):
     def draw_hud(self):
         raise NotImplementedError
 
-    def update_track(self, segments):
+    def update_track(self, points):
         pass

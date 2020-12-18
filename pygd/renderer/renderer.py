@@ -5,18 +5,22 @@ import pyglet.gl as gl
 
 from pygd.bike import Bike
 from pygd.renderer.base import BaseWindow
+from pygd.renderer.poly_line import PolyLine
 
 
 class RendererWindow(BaseWindow):
     COLOR_BG = (1.0, 1.0, 1.0, 1.0)
-    COLOR_TRACK = (0, 255, 0)
 
-    WIDTH_TRACK = 1
+    COLOR_TRACK = (0, 255, 0)
+    LINE_WIDTH_TRACK = 1.0
+
+    COLOR_BIKE_FRAME = (50, 50, 50)
+    LINE_WIDTH_BIKE_FRAME = 1.0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        pyglet.gl.glClearColor(*self.COLOR_BG)
+        gl.glClearColor(*self.COLOR_BG)
 
         # Enable alpha blending
         gl.glEnable(gl.GL_BLEND)
@@ -37,44 +41,28 @@ class RendererWindow(BaseWindow):
             self.sprites_wheel.append(sprite)
 
         # Create bike frame
-        self.batch_bike_frame = pyglet.graphics.Batch()
-        self.bike_frame_lines = [
-            pyglet.shapes.Line(
-                0,
-                0,
-                0,
-                0,
-                width=1,
-                color=(50, 50, 50),
-                batch=self.batch_bike_frame,
-            )
-            for _ in Bike.FRAME_POINTS
-        ]
+        self.bike_frame_lines = PolyLine(
+            [(0.0, 0.0) for _ in Bike.FRAME_POINTS],
+            close=True,
+            line_width=self.LINE_WIDTH_BIKE_FRAME,
+            color=self.COLOR_BIKE_FRAME,
+        )
 
     def load_images(self):
         self.img_wheel = pyglet.resource.image("wheel.png")
         self.img_wheel.anchor_x = self.img_wheel.width // 2
         self.img_wheel.anchor_y = self.img_wheel.height // 2
 
-    def update_track(self, segments):
+    def update_track(self, points):
         self.batch_track_line = pyglet.graphics.Batch()
-        self.track_lines = []
-        for segment in segments:
-            line = pyglet.shapes.Line(
-                segment.a[0],
-                segment.a[1],
-                segment.b[0],
-                segment.b[1],
-                width=self.WIDTH_TRACK,
-                color=self.COLOR_TRACK,
-                batch=self.batch_track_line,
-            )
-            self.track_lines.append(line)
+        self.track_lines = PolyLine(
+            points, line_width=self.LINE_WIDTH_TRACK, color=self.COLOR_TRACK
+        )
 
     def draw_objects(self):
         self.update_objects()
-        self.batch_track_line.draw()
-        self.batch_bike_frame.draw()
+        self.track_lines.draw()
+        self.bike_frame_lines.draw()
         self.batch_bike_sprites.draw()
 
     def draw_hud(self):
@@ -91,10 +79,8 @@ class RendererWindow(BaseWindow):
         # Bike frame
         frame_shape = self.game.bike.frame_shape
         frame_body = self.game.bike.frame_body
-        frame_vertices = [  # Transform to world coords
+        points = [  # Transform to world coords
             (v.rotated(frame_body.angle) + frame_body.position)
             for v in frame_shape.get_vertices()
         ]
-        for i, line in enumerate(self.bike_frame_lines):
-            line.x, line.y = frame_vertices[i]
-            line.x2, line.y2 = frame_vertices[(i + 1) % len(frame_vertices)]
+        self.bike_frame_lines.update(points)

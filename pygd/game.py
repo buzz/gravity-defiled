@@ -52,7 +52,7 @@ class PyGd:
         self.load_mrg(0, 9)
         self.bike = Bike(self.track_manager.current.start, self.space)
         self.step(self.timestep)
-        self.renderer.update_track(self.track_manager.segments)
+        self.renderer.update_track(self.track_manager.current.points)
         pyglet.clock.schedule_interval(self.step, self.timestep)
         pyglet.app.run()
 
