@@ -70,8 +70,8 @@ class RendererWindow(BaseWindow):
 
     def update_objects(self):
         # Wheels
-        for i, attr in enumerate(("wheel_l_body", "wheel_r_body")):
-            wheel_body = getattr(self.game.bike, attr)
+        for i in range(2):
+            wheel_body = self.game.bike.wheels_body[i]
             x, y = wheel_body.position
             rotation = -math.degrees(wheel_body.angle)
             self.sprites_wheel[i].update(x=x, y=y, rotation=rotation)
