@@ -33,15 +33,15 @@ class PyGd:
         self.braking = False
 
     def run(self):
-        # self.start_test_level()
-        self.load_mrg()
+        self.start_test_level()
+        # self.load_mrg(2, 0)
         self.bike = Bike(self.track_manager.current.start, self.space)
         self.step(self.timestep)
         pyglet.clock.schedule_interval(self.step, self.timestep)
         pyglet.app.run()
 
-    def load_mrg(self):
-        track = TrackManager.load_mrg_track("levels.mrg", 0, 1)
+    def load_mrg(self, level, track):
+        track = TrackManager.load_mrg_track("levels.mrg", level, track)
         self.track_manager.add(track)
         self.track_manager.current = self.track_manager.tracks[0]
         self.track_manager.add_to_space(self.track_manager.current, self.space)
@@ -62,7 +62,7 @@ class PyGd:
             (900, 790),
             (1800, 780),
         )
-        track = Track(points, Vec2d(100, 860), Vec2d(1500, 860))
+        track = Track(points, Vec2d(100, 560), Vec2d(1500, 860))
         self.track_manager.add(track)
         self.track_manager.current = self.track_manager.tracks[0]
         self.track_manager.add_to_space(self.track_manager.current, self.space)

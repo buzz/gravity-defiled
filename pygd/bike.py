@@ -3,33 +3,36 @@ from pymunk.vec2d import Vec2d
 
 
 class Bike:
-    accel_ang_vel = 0.7
-    max_ang_vel = 20.0
-    brake_factor = 0.8
+    JOINT_BREAK_THRESHOLD = 800000
+    ACCEL_ANG_VEL = 1.9
+    MAX_ANG_VEL = 30.0
+    BRAKE_FACTOR = 0.7
 
-    wheel_radius = 24.5
-    wheel_radius_inner = 20.0
-    wheel_color = 90, 200, 20, 255
-    wheel_friction = 1.4
-    wheel_elasticity = 0.5
+    WHEEL_RADIUS = 20.5
+    WHEEL_RADIUS_INNER = 14.1
+    WHEEL_COLOR = 90, 200, 20, 255
+    WHEEL_FRICTION = 3.4
+    WHEEL_ELASTICITY = 0.5
 
-    wheel_l_pos = Vec2d(-34.0, 6.0)
-    wheel_l_mass = 25
+    WHEEL_L_POS = Vec2d(-34.0, 6.0)
+    WHEEL_L_MASS = 25
 
-    wheel_r_pos = Vec2d(41.0, 6.0)
-    wheel_r_mass = 8
+    WHEEL_R_POS = Vec2d(41.0, 6.0)
+    WHEEL_R_MASS = 8
 
-    frame_point_top_l = Vec2d(-11.7, -13.1)
-    frame_point_top_r = Vec2d(23.1, -31.55)
-    frame_point_bottom = Vec2d(-4.5, 9.55)
-
-    joint_break_threshold = 200000
+    FRAME_FRICTION = 0.1
+    FRAME_POINT_TOP = Vec2d(31, -36)
+    FRAME_POINT_BOT_R = Vec2d(10, 3.55)
+    FRAME_POINT_BOT_L = Vec2d(-18, 0.55)
 
     def __init__(self, start_pos, space):
         self.space = space
         self.start_pos = start_pos
+        self.crashed = False
+        self.filter_group = pymunk.ShapeFilter(group=1)
         self.create_wheels()
         self.create_frame()
+        self.joints = []
         self.create_joints()
 
     def __del__(self):
@@ -45,76 +48,97 @@ class Bike:
 
     def create_wheels(self):
         moment = pymunk.moment_for_circle(
-            self.wheel_l_mass, self.wheel_radius_inner, self.wheel_radius
+            self.WHEEL_L_MASS, self.WHEEL_RADIUS_INNER, self.WHEEL_RADIUS
         )
-        self.wheel_l_body = pymunk.Body(self.wheel_l_mass, moment)
-        self.wheel_l_shape = pymunk.Circle(self.wheel_l_body, self.wheel_radius)
-        self.wheel_l_shape.friction = self.wheel_friction
-        self.wheel_l_shape.elasticity = self.wheel_elasticity
-        self.wheel_l_shape.color = self.wheel_color
-        self.wheel_l_body.position = self.start_pos + self.wheel_l_pos
+        self.wheel_l_body = pymunk.Body(self.WHEEL_L_MASS, moment)
+        self.wheel_l_shape = pymunk.Circle(self.wheel_l_body, self.WHEEL_RADIUS)
+        self.wheel_l_shape.friction = self.WHEEL_FRICTION
+        self.wheel_l_shape.elasticity = self.WHEEL_ELASTICITY
+        self.wheel_l_shape.color = self.WHEEL_COLOR
+        self.wheel_l_body.position = self.start_pos + self.WHEEL_L_POS
+        self.wheel_l_shape.filter = self.filter_group
         self.space.add(self.wheel_l_body, self.wheel_l_shape)
 
         moment = pymunk.moment_for_circle(
-            self.wheel_r_mass, self.wheel_radius_inner, self.wheel_radius
+            self.WHEEL_R_MASS, self.WHEEL_RADIUS_INNER, self.WHEEL_RADIUS
         )
-        self.wheel_r_body = pymunk.Body(self.wheel_r_mass, moment)
-        self.wheel_r_shape = pymunk.Circle(self.wheel_r_body, self.wheel_radius)
-        self.wheel_r_shape.friction = self.wheel_friction
-        self.wheel_l_shape.elasticity = self.wheel_elasticity
-        self.wheel_r_shape.color = self.wheel_color
-        self.wheel_r_body.position = self.start_pos + self.wheel_r_pos
+        self.wheel_r_body = pymunk.Body(self.WHEEL_R_MASS, moment)
+        self.wheel_r_shape = pymunk.Circle(self.wheel_r_body, self.WHEEL_RADIUS)
+        self.wheel_r_shape.friction = self.WHEEL_FRICTION
+        self.wheel_l_shape.elasticity = self.WHEEL_ELASTICITY
+        self.wheel_r_shape.color = self.WHEEL_COLOR
+        self.wheel_r_body.position = self.start_pos + self.WHEEL_R_POS
+        self.wheel_r_shape.filter = self.filter_group
         self.space.add(self.wheel_r_body, self.wheel_r_shape)
 
     def create_frame(self):
         frame_points = (
-            self.frame_point_top_l,
-            self.frame_point_top_r,
-            self.frame_point_bottom,
+            self.FRAME_POINT_BOT_L,
+            self.FRAME_POINT_TOP,
+            self.FRAME_POINT_BOT_R,
         )
         frame_mass = 3
         moment = pymunk.moment_for_poly(frame_mass, frame_points)
         self.frame_body = pymunk.Body(frame_mass, moment)
         self.frame_shape = pymunk.Poly(self.frame_body, frame_points)
-        self.frame_shape.friction = 1
+        self.frame_shape.friction = self.FRAME_FRICTION
         self.frame_shape.color = 128, 128, 128, 255
         self.frame_body.position = self.start_pos
+        self.frame_shape.filter = self.filter_group
         self.space.add(self.frame_body, self.frame_shape)
 
     def create_joints(self):
         self.joints = [
-            pymunk.PinJoint(
-                self.wheel_l_body, self.frame_body, (0, 0), self.frame_point_top_l
+            # Left wheel to bottom frame
+            pymunk.SlideJoint(
+                self.wheel_l_body, self.frame_body, (0, 0), (-10, -2), 25, 26
             ),
-            pymunk.PinJoint(
-                self.wheel_l_body, self.frame_body, (0, 0), self.frame_point_bottom
-            ),
-            pymunk.PinJoint(
-                self.wheel_r_body, self.frame_body, (0, 0), self.frame_point_bottom
+            # Left wheel to top frame
+            pymunk.SlideJoint(
+                self.wheel_l_body, self.frame_body, (0, 0), (0, -25.0), 38, 41
             ),
             pymunk.DampedSpring(
-                self.wheel_r_body, self.frame_body, (0, 0), (26.5, -25.0), 42, 170, 50
+                self.wheel_l_body, self.frame_body, (0, 0), (0, -25.0), 42, 170, 50
+            ),
+            # Right wheel to bottom frame
+            pymunk.SlideJoint(
+                self.wheel_r_body, self.frame_body, (0, 0), (0, 0), 44, 45
+            ),
+            # Right wheel to top frame
+            pymunk.SlideJoint(
+                self.wheel_r_body, self.frame_body, (0, 0), (26.5, -25.0), 30, 56
+            ),
+            pymunk.DampedSpring(
+                self.wheel_r_body, self.frame_body, (0, 0), (26.5, -25.0), 45, 120, 30
+            ),
+            # Left to right wheel, only min distance important here, so bike can't
+            # fold into itself
+            pymunk.SlideJoint(
+                self.wheel_r_body, self.wheel_l_body, (0, 0), (0, 0), 60, 500
             ),
         ]
         self.space.add(*self.joints)
 
     def update(self, game, delta_t):
-        self.handle_left_wheel(game)
-        self.check_joint_break(delta_t)
+        if not self.crashed:
+            self.handle_left_wheel(game)
+            self.check_joint_break(delta_t)
 
     def handle_left_wheel(self, game):
         if game.accelerating:
-            self.wheel_l_body.angular_velocity += self.accel_ang_vel
+            self.wheel_l_body.angular_velocity += self.ACCEL_ANG_VEL
         if game.braking and abs(self.wheel_l_body.angular_velocity) > 0.15:
-            self.wheel_l_body.angular_velocity *= self.brake_factor
+            self.wheel_l_body.angular_velocity *= self.BRAKE_FACTOR
 
-        if self.wheel_l_body.angular_velocity > self.max_ang_vel:
-            self.wheel_l_body.angular_velocity = self.max_ang_vel
-        elif self.wheel_l_body.angular_velocity < -self.max_ang_vel:
-            self.wheel_l_body.angular_velocity = -self.max_ang_vel
+        if self.wheel_l_body.angular_velocity > self.MAX_ANG_VEL:
+            self.wheel_l_body.angular_velocity = self.MAX_ANG_VEL
+        elif self.wheel_l_body.angular_velocity < -self.MAX_ANG_VEL:
+            self.wheel_l_body.angular_velocity = -self.MAX_ANG_VEL
 
     def check_joint_break(self, delta_t):
         for joint in self.joints:
-            if joint.impulse / delta_t > self.joint_break_threshold:
-                self.space.remove(joint)
-                self.joints.remove(joint)
+            if joint.impulse / delta_t > self.JOINT_BREAK_THRESHOLD:
+                self.crashed = True
+                self.space.remove(*self.joints)
+                self.joints = []
+                break
