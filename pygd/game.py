@@ -10,15 +10,17 @@ from pygd.track import Track, TrackManager
 
 class PyGd:
     FPS = 60
-    DAMPING = 0.85
+    DAMPING = 0.95
+    GRAVITY = (0.0, 450.0)
     SCREEN_SIZE = (1600, 900)
     TITLE = "PyGD"
 
     def __init__(self, debug_render=False):
         self.timestep = 1.0 / self.FPS
-        self.space = pymunk.Space()
+        self.space = pymunk.Space(threaded=True)
+        self.space.threads = 2
         self.space.damping = self.DAMPING
-        self.space.gravity = 0, 900
+        self.space.gravity = self.GRAVITY
         self.space.sleep_time_threshold = 0.3
 
         pyglet.resource.path = ["res"]
@@ -46,10 +48,12 @@ class PyGd:
         # input states
         self.accelerating = False
         self.braking = False
+        self.leaning_l = False
+        self.leaning_r = False
 
     def run(self):
         # self.start_test_level()
-        self.load_mrg(0, 9)
+        self.load_mrg(1, 1)
         self.bike = Bike(self.track_manager.current.start, self.space)
         self.step(self.timestep)
         self.renderer.update_track(self.track_manager.current.points)
@@ -78,7 +82,7 @@ class PyGd:
             (900, 790),
             (1800, 780),
         )
-        track = Track(points, Vec2d(100, 560), Vec2d(1500, 860))
+        track = Track(points, Vec2d(0, 860), Vec2d(1500, 860))
         self.track_manager.add(track)
         self.track_manager.current = self.track_manager.tracks[0]
         self.track_manager.add_to_space(self.track_manager.current, self.space)

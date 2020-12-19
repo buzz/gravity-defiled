@@ -27,9 +27,10 @@ class TrackManager:
         for idx in range(len(track.points) - 1):
             point_1 = track.points[idx]
             point_2 = track.points[idx + 1]
-            segment = pymunk.Segment(space.static_body, point_1, point_2, Track.width)
-            segment.elasticity = Track.elasticity
-            segment.friction = Track.friction
+            segment = pymunk.Segment(space.static_body, point_1, point_2, Track.WIDTH)
+            segment.collision_type = Track.COLLISION_TYPE
+            segment.elasticity = Track.ELASTICITY
+            segment.friction = Track.FRICTION
             self.segments.append(segment)
             space.add(segment)
 

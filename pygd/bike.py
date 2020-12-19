@@ -1,12 +1,18 @@
+import math
+
 import pymunk
 from pymunk.vec2d import Vec2d
+
+from pygd.track import Track
 
 
 class Bike:
     JOINT_BREAK_THRESHOLD = 700000
-    ACCEL_ANG_VEL = 1.5
-    MAX_ANG_VEL = 24.0
+    ACCEL_ANG_VEL = 2.0
+    MAX_ANG_VEL = 20.0
     BRAKE_FACTOR = 0.7
+    LEAN_SPEED_FORWARD = 0.4
+    LEAN_SPEED_BACKWARD = 0.05
 
     WHEEL_RADIUS = 20.5
     WHEEL_RADIUS_INNER = 14.1
@@ -14,33 +20,51 @@ class Bike:
     WHEEL_ELASTICITY = 0.5
 
     WHEEL_L_POS = Vec2d(-34.0, 6.0)
-    WHEEL_L_MASS = 25
+    WHEEL_L_MASS = 20
 
     WHEEL_R_POS = Vec2d(41.0, 6.0)
     WHEEL_R_MASS = 8
+    WHEEL_R_COLLISION_TYPE = 1
 
     FRAME_FRICTION = 0.1
+    FRAME_MASS = 10
     FRAME_POINTS = (
         Vec2d(31, -36),
         Vec2d(10, 3.55),
         Vec2d(-18, 0.55),
     )
 
+    DRIVER_RADIUS = 11
+    DRIVER_FRICTION = 2
+    DRIVER_MASS = 15
+    DRIVER_POS = Vec2d(0, -75)
+    DRIVER_JOINT_DIST_L = 100.0
+    DRIVER_JOINT_DIST_R = 90.0
+    DRIVER_COLLISION_TYPE = 2
+
     def __init__(self, start_pos, space):
         self.space = space
         self.start_pos = start_pos
-        self.crashed = False
+        self.bike_broken = False
+        self.driver_crash = False
+        self.driver_lean = 0.0
+        self.wheel_r_coll = 0  # collision counter
 
         self.filter_group = pymunk.ShapeFilter(group=1)
         self.frame_body = None
         self.frame_shape = None
+        self.driver_body = None
+        self.driver_shape = None
         self.wheels_body = []
         self.wheels_shape = []
-        self.joints = []
+        self.frame_joints = []
+        self.driver_joints = []
 
         self.create_wheels()
         self.create_frame()
-        self.create_joints()
+        self.create_driver()
+        self.create_frame_joints()
+        self.create_driver_joints()
 
     def __del__(self):
         self.space.remove(
@@ -48,7 +72,7 @@ class Bike:
             *self.wheels_shape,
             self.frame_body,
             self.frame_shape,
-            *self.joints,
+            *self.frame_joints,
         )
 
     def create_wheels(self):
@@ -69,18 +93,39 @@ class Bike:
             self.wheels_shape.append(wheel_shape)
             self.space.add(wheel_body, wheel_shape)
 
+        self.wheels_shape[1].collision_type = self.WHEEL_R_COLLISION_TYPE
+        handler = self.space.add_collision_handler(
+            self.WHEEL_R_COLLISION_TYPE, Track.COLLISION_TYPE
+        )
+        handler.begin = self.coll_wheel_r_ground_begin
+        handler.separate = self.coll_wheel_r_ground_separate
+
     def create_frame(self):
-        frame_mass = 3
-        moment = pymunk.moment_for_poly(frame_mass, self.FRAME_POINTS)
-        self.frame_body = pymunk.Body(frame_mass, moment)
+        moment = pymunk.moment_for_poly(self.FRAME_MASS, self.FRAME_POINTS)
+        self.frame_body = pymunk.Body(self.FRAME_MASS, moment)
         self.frame_shape = pymunk.Poly(self.frame_body, self.FRAME_POINTS)
         self.frame_shape.friction = self.FRAME_FRICTION
         self.frame_body.position = self.start_pos
         self.frame_shape.filter = self.filter_group
         self.space.add(self.frame_body, self.frame_shape)
 
-    def create_joints(self):
-        self.joints = [
+    def create_driver(self):
+        moment = pymunk.moment_for_circle(self.DRIVER_MASS, 0, self.DRIVER_RADIUS)
+        self.driver_body = pymunk.Body(self.DRIVER_MASS, moment)
+        self.driver_shape = pymunk.Circle(self.driver_body, self.DRIVER_RADIUS)
+        self.driver_shape.friction = self.DRIVER_FRICTION
+        self.driver_body.position = self.start_pos + self.DRIVER_POS
+        self.driver_shape.filter = self.filter_group
+        self.space.add(self.driver_body, self.driver_shape)
+
+        self.driver_shape.collision_type = self.DRIVER_COLLISION_TYPE
+        handler = self.space.add_collision_handler(
+            self.DRIVER_COLLISION_TYPE, Track.COLLISION_TYPE
+        )
+        handler.begin = self.coll_driver_ground_begin
+
+    def create_frame_joints(self):
+        self.frame_joints = [
             # Left wheel to bottom frame
             pymunk.SlideJoint(
                 self.wheels_body[0], self.frame_body, (0, 0), (-10, -2), 25, 26
@@ -98,7 +143,7 @@ class Bike:
             ),
             # Right wheel to top frame
             pymunk.SlideJoint(
-                self.wheels_body[1], self.frame_body, (0, 0), (26.5, -25.0), 30, 56
+                self.wheels_body[1], self.frame_body, (0, 0), (26.5, -25.0), 31, 40
             ),
             pymunk.DampedSpring(
                 self.wheels_body[1], self.frame_body, (0, 0), (26.5, -25.0), 45, 120, 30
@@ -109,28 +154,125 @@ class Bike:
                 self.wheels_body[0], self.wheels_body[1], (0, 0), (0, 0), 60, 500
             ),
         ]
-        self.space.add(*self.joints)
+        self.space.add(*self.frame_joints)
+
+    def create_driver_joints(self):
+        self.driver_joints = [
+            # Frame to driver left
+            pymunk.PinJoint(
+                self.frame_body,
+                self.driver_body,
+                (-50, 0),
+                (0, 0),
+            ),
+            # Frame to driver right
+            pymunk.PinJoint(
+                self.frame_body,
+                self.driver_body,
+                (50, 0),
+                (0, 0),
+            ),
+        ]
+        self.space.add(*self.driver_joints)
 
     def update(self, game, delta_t):
         if not self.crashed:
-            self.apply_input(game)
+            self.apply_control_inputs(game)
+            self.apply_lean()
             self.check_joint_break(delta_t)
 
-    def apply_input(self, game):
+    def apply_control_inputs(self, game):
+        # Accelerate/braking
         if game.accelerating:
             self.wheels_body[0].angular_velocity += self.ACCEL_ANG_VEL
         if game.braking and abs(self.wheels_body[0].angular_velocity) > 0.15:
             self.wheels_body[0].angular_velocity *= self.BRAKE_FACTOR
 
+        # Limit max. wheel velocity
         if self.wheels_body[0].angular_velocity > self.MAX_ANG_VEL:
             self.wheels_body[0].angular_velocity = self.MAX_ANG_VEL
         elif self.wheels_body[0].angular_velocity < -self.MAX_ANG_VEL:
             self.wheels_body[0].angular_velocity = -self.MAX_ANG_VEL
 
+        # Leaning (keyboard logic)
+        if game.leaning_l:
+            if self.driver_lean > 0.0:
+                self.driver_lean = 0.0
+            else:
+                self.driver_lean -= self.LEAN_SPEED_BACKWARD
+        elif game.leaning_r:
+            if self.driver_lean < 0.0:
+                self.driver_lean = 0.0
+            else:
+                self.driver_lean += self.LEAN_SPEED_FORWARD
+        else:
+            # Auto-center driver if not leaning
+            if abs(self.driver_lean) < 0.05:
+                self.driver_lean = 0.0
+            else:
+                self.driver_lean *= 0.6
+
+        # Keep driver_lean within (-1, 1)
+        if self.driver_lean > 1.0:
+            self.driver_lean = 1.0
+        elif self.driver_lean < -1.0:
+            self.driver_lean = -1.0
+
+    def apply_lean(self):
+        l = self.driver_lean
+
+        if l > 0.0:
+            self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L - l * 1.0
+            self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 36.0
+            # Bike tilting to make it easier to counter back flipping (e.g. in
+            # wheelie or in air)
+            if self.wheel_r_coll == 0:
+                self.tilt(10.0)
+        elif l < 0.0:
+            self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L + l * 22.0
+            self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 2.0
+            self.tilt(-10.0)
+        else:
+            self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L
+            self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R
+
     def check_joint_break(self, delta_t):
-        for joint in self.joints:
+        for joint in self.frame_joints:
             if joint.impulse / delta_t > self.JOINT_BREAK_THRESHOLD:
-                self.crashed = True
-                self.space.remove(*self.joints)
-                self.joints = []
+                self.bike_broken = True
+                self.space.remove(*self.frame_joints)
+                self.frame_joints = []
                 break
+
+    def tilt(self, amount):
+        """Tilt bike forward (pos. amount) or backward (neg. amount)."""
+        self.frame_body.angular_velocity += 0.15 * amount
+        wheel_l = self.wheels_body[1]
+        force = Vec2d(3.5 * amount, 0.0)
+        force = force.rotated(-self.angle)
+        wheel_l.apply_impulse_at_world_point(force, wheel_l.local_to_world((0.0, 0.0)))
+
+    @property
+    def crashed(self):
+        return self.driver_crash or self.bike_broken
+
+    @property
+    def angle(self):
+        return self.frame_body.angle
+
+    @property
+    def angle_mod2pi(self):
+        return self.angle % (-2.0 * math.pi)
+
+    # Collision events
+
+    def coll_wheel_r_ground_begin(self, *_):
+        self.wheel_r_coll += 1
+        return True
+
+    def coll_wheel_r_ground_separate(self, *_):
+        self.wheel_r_coll -= 1
+
+    def coll_driver_ground_begin(self, *_):
+        self.driver_crash = True
+        return True

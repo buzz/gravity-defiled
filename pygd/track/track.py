@@ -1,7 +1,8 @@
 class Track:
-    elasticity = 0.5
-    friction = 1.0
-    width = 0.0
+    COLLISION_TYPE = 10
+    ELASTICITY = 0.5
+    FRICTION = 3.0
+    WIDTH = 0.0
 
     def __init__(self, points, start, finish):
         self.points = points
