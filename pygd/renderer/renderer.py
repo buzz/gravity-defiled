@@ -34,7 +34,7 @@ class RendererWindow(BaseWindow):
 
         self.load_images()
 
-        # Create wheel sprites
+        # Wheel sprites
         self.batch_bike_sprites = pyglet.graphics.Batch()
         self.sprites_wheel = []
         for _ in range(2):
@@ -42,7 +42,7 @@ class RendererWindow(BaseWindow):
             sprite.scale = Bike.WHEEL_RADIUS / (self.img_wheel.width / 2)
             self.sprites_wheel.append(sprite)
 
-        # Create bike frame
+        # Bike frame
         self.bike_frame_lines = PolyLine(
             [(0.0, 0.0) for _ in Bike.FRAME_POINTS],
             close=True,
@@ -50,7 +50,12 @@ class RendererWindow(BaseWindow):
             color=self.COLOR_BIKE_FRAME,
         )
 
-        # Create message label
+        # Driver head
+        self.driver_head = pyglet.shapes.Circle(
+            0, 0, Bike.DRIVER_RADIUS, 16, color=(85, 35, 35)
+        )
+
+        # Message label
         self.batch_hud = pyglet.graphics.Batch()
         self.message_label = pyglet.text.Label(
             "",
@@ -89,6 +94,7 @@ class RendererWindow(BaseWindow):
         self.update_objects()
         self.track_lines.draw()
         self.bike_frame_lines.draw()
+        self.driver_head.draw()
         self.batch_bike_sprites.draw()
 
     def draw_hud(self):
@@ -110,3 +116,8 @@ class RendererWindow(BaseWindow):
             for v in frame_shape.get_vertices()
         ]
         self.bike_frame_lines.update(points)
+
+        # Driver
+        x, y = self.game.bike.driver_body.position
+        self.driver_head.x = x
+        self.driver_head.y = y
