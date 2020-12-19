@@ -48,6 +48,24 @@ class RendererWindow(BaseWindow):
             color=self.COLOR_BIKE_FRAME,
         )
 
+        # Create message label
+        self.batch_hud = pyglet.graphics.Batch()
+        self.message_label = pyglet.text.Label(
+            "",
+            color=(0, 0, 0, 255),
+            font_name="Arial",
+            font_size=36,
+            x=self.width // 2,
+            y=self.height // 2,
+            anchor_x="center",
+            anchor_y="center",
+            batch=self.batch_hud,
+        )
+
+    def show_message(self, text):
+        self.message_label.text = text
+        self.message_label.visible = True
+
     def load_images(self):
         self.img_wheel = pyglet.resource.image("wheel.png")
         self.img_wheel.anchor_x = self.img_wheel.width // 2
@@ -66,7 +84,7 @@ class RendererWindow(BaseWindow):
         self.batch_bike_sprites.draw()
 
     def draw_hud(self):
-        pass
+        self.batch_hud.draw()
 
     def update_objects(self):
         # Wheels

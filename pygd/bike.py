@@ -42,7 +42,8 @@ class Bike:
     DRIVER_JOINT_DIST_R = 90.0
     DRIVER_COLLISION_TYPE = 2
 
-    def __init__(self, start_pos, space):
+    def __init__(self, game, start_pos, space):
+        self.game = game
         self.space = space
         self.start_pos = start_pos
         self.bike_broken = False
@@ -176,7 +177,9 @@ class Bike:
         self.space.add(*self.driver_joints)
 
     def update(self, game, delta_t):
-        if not self.crashed:
+        if self.crashed:
+            self.game.bike_crashed()
+        else:
             self.apply_control_inputs(game)
             self.apply_lean()
             self.check_joint_break(delta_t)

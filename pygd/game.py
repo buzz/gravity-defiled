@@ -54,7 +54,7 @@ class PyGd:
     def run(self):
         # self.start_test_level()
         self.load_mrg(1, 1)
-        self.bike = Bike(self.track_manager.current.start, self.space)
+        self.bike = Bike(self, self.track_manager.current.start, self.space)
         self.step(self.timestep)
         self.renderer.update_track(self.track_manager.current.points)
         pyglet.clock.schedule_interval(self.step, self.timestep)
@@ -91,3 +91,6 @@ class PyGd:
         self.bike.update(self, self.timestep)
         self.camera.update(self.bike.frame_body.position)
         self.space.step(self.timestep)
+
+    def bike_crashed(self):
+        self.renderer.show_message("Crashed!")

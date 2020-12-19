@@ -30,7 +30,6 @@ class BaseWindow(Window):
         gl.glPopMatrix()
         gl.glPopMatrix()
 
-        self.camera.project_hud()
         self.draw_hud()
 
     def draw_objects(self):
