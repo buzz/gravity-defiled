@@ -26,6 +26,8 @@ class PyGd:
         pyglet.resource.path = ["res"]
         pyglet.resource.reindex()
 
+        self.playing = False
+
         self.track_manager = TrackManager()
         self.bike = None
 
@@ -58,6 +60,8 @@ class PyGd:
         self.step(self.timestep)
         self.renderer.update_track(self.track_manager.current.points)
         pyglet.clock.schedule_interval(self.step, self.timestep)
+        self.renderer.show_message(self.track_manager.current.name)
+        self.playing = True
         pyglet.app.run()
 
     def load_mrg(self, level, track):
@@ -88,9 +92,10 @@ class PyGd:
         self.track_manager.add_to_space(self.track_manager.current, self.space)
 
     def step(self, _):
-        self.bike.update(self, self.timestep)
+        if not self.bike.crashed:
+            self.bike.update(self, self.timestep)
+        elif self.playing:
+            self.playing = False
+            self.renderer.show_message("Crashed!")
         self.camera.update(self.bike.frame_body.position)
         self.space.step(self.timestep)
-
-    def bike_crashed(self):
-        self.renderer.show_message("Crashed!")

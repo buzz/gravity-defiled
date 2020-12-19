@@ -177,12 +177,9 @@ class Bike:
         self.space.add(*self.driver_joints)
 
     def update(self, game, delta_t):
-        if self.crashed:
-            self.game.bike_crashed()
-        else:
-            self.apply_control_inputs(game)
-            self.apply_lean()
-            self.check_joint_break(delta_t)
+        self.apply_control_inputs(game)
+        self.apply_lean()
+        self.check_joint_break(delta_t)
 
     def apply_control_inputs(self, game):
         # Accelerate/braking

@@ -100,6 +100,7 @@ class MrgFile:
                 i += 1
 
             return Track(
+                self.header.names[level][track_num],
                 points,
                 self.scale_point(Vec2d(start_x, start_y)),
                 self.scale_point(Vec2d(finish_x, finish_y)),

@@ -17,6 +17,8 @@ class RendererWindow(BaseWindow):
     COLOR_BIKE_FRAME = (50, 50, 50)
     LINE_WIDTH_BIKE_FRAME = 1.0
 
+    MESSAGE_TIMEOUT = 2.5
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -56,15 +58,21 @@ class RendererWindow(BaseWindow):
             font_name="Arial",
             font_size=36,
             x=self.width // 2,
-            y=self.height // 2,
+            y=self.height // 4,
             anchor_x="center",
             anchor_y="center",
             batch=self.batch_hud,
         )
 
-    def show_message(self, text):
+    def show_message(self, text, auto_clear=True):
         self.message_label.text = text
         self.message_label.visible = True
+        if auto_clear:
+            pyglet.clock.schedule_once(self.clear_message, self.MESSAGE_TIMEOUT)
+
+    def clear_message(self, _):
+        self.message_label.text = ""
+        self.message_label.visible = False
 
     def load_images(self):
         self.img_wheel = pyglet.resource.image("wheel.png")
