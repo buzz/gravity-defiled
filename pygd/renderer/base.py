@@ -38,5 +38,8 @@ class BaseWindow(Window):
     def draw_hud(self):
         raise NotImplementedError
 
+    def show_message(self, text):
+        raise NotImplementedError
+
     def update_track(self, points):
-        pass
+        raise NotImplementedError
