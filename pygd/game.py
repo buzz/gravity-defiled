@@ -3,7 +3,7 @@ import pymunk
 from pymunk.vec2d import Vec2d
 
 from pygd.bike import Bike
-from pygd.renderer import Camera, DebugRendererWindow, RendererWindow
+from pygd.renderer import DebugRendererWindow, RendererWindow
 from pygd.input import GamepadInput, KeyboardInput
 from pygd.track import Track, TrackManager
 
@@ -31,7 +31,6 @@ class PyGd:
         self.track_manager = TrackManager()
         self.bike = None
 
-        self.camera = Camera(*self.SCREEN_SIZE)
         Window = DebugRendererWindow if debug_render else RendererWindow
         caption = f"{self.TITLE}"
         if debug_render:
@@ -39,16 +38,15 @@ class PyGd:
 
         self.renderer = Window(
             game=self,
-            camera=self.camera,
             space=self.space,
             width=self.SCREEN_SIZE[0],
             height=self.SCREEN_SIZE[1],
             caption=caption,
         )
         self.keyboard_input = KeyboardInput(self, self.renderer)
-        # self.controls = self.keyboard_input
-        self.gamepad_input = GamepadInput(self)
-        self.controls = self.gamepad_input
+        self.controls = self.keyboard_input
+        # self.gamepad_input = GamepadInput(self)
+        # self.controls = self.gamepad_input
 
     def run(self):
         self.reset()
@@ -98,5 +96,4 @@ class PyGd:
         elif self.playing:
             self.playing = False
             self.renderer.show_message("Crashed!")
-        self.camera.update(self.bike.frame_body.position)
         self.space.step(self.timestep)

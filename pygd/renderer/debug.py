@@ -18,7 +18,7 @@ class DebugRendererWindow(BaseWindow):
     def draw_hud(self):
         self.fps_display.draw()
 
-    def show_message(self, text):
+    def show_message(self, text, auto_clear=True):
         print(f"DEBUG: show_message '{text}'")
 
     def update_track(self, points):

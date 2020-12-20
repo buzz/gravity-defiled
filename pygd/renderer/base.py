@@ -1,34 +1,23 @@
 from pyglet.window import Window
-import pyglet.gl as gl
+
+from pygd.renderer.transformations import ToPymunkCoords, WorldCamera
 
 
 class BaseWindow(Window):
-    def __init__(self, camera, space, game, *args, **kwargs):
+    def __init__(self, space, game, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.camera = camera
         self.game = game
         self.space = space
+
+        self.to_pymunk_coords = ToPymunkCoords(self)
+        self.world_camera = WorldCamera(self)
 
     def on_draw(self):
         self.clear()
 
-        self.camera.project()
-
-        # Use transformations, so we can draw in pymunk coordinate space
-
-        # Invert y axis
-        gl.glPushMatrix()
-        gl.glScalef(1.0, -1.0, 1.0)
-        gl.glTranslatef(0.0, -self.height, 0.0)
-
-        # Translate objects to viewport center (camera follow)
-        gl.glPushMatrix()
-        gl.glTranslatef(self.camera.x, self.camera.y, 0.0)
-
-        self.draw_objects()
-
-        gl.glPopMatrix()
-        gl.glPopMatrix()
+        with self.to_pymunk_coords:
+            with self.world_camera:
+                self.draw_objects()
 
         self.draw_hud()
 
@@ -38,7 +27,7 @@ class BaseWindow(Window):
     def draw_hud(self):
         raise NotImplementedError
 
-    def show_message(self, text):
+    def show_message(self, text, auto_clear=True):
         raise NotImplementedError
 
     def update_track(self, points):
