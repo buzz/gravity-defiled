@@ -1,10 +1,10 @@
 from pyglet.window import FPSDisplay
 import pymunk.pyglet_util
 
-from pygd.renderer.base import BaseWindow
+from pygd.window.base import BaseWindow
 
 
-class DebugRendererWindow(BaseWindow):
+class DebugWindow(BaseWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.draw_options = pymunk.pyglet_util.DrawOptions()

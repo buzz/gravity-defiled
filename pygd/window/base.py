@@ -1,6 +1,6 @@
 from pyglet.window import Window
 
-from pygd.renderer.transformations import ToPymunkCoords, WorldCamera
+from pygd.window.transformations import ToPymunkCoords, WorldCamera
 
 
 class BaseWindow(Window):

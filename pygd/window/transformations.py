@@ -30,11 +30,13 @@ class ToPymunkCoords(BaseGlTransformation):
 
 class WorldCamera(BaseGlTransformation):
     def begin(self):
-        pos = self.win.game.bike.frame_body.position
-        x = -(pos.x - self.win.width // 2)
-        y = -(pos.y - self.win.height // 2)
         gl.glPushMatrix()
-        gl.glTranslatef(x, y, 0.0)
+        bike = self.win.game.bike
+        if bike:
+            pos = bike.frame_body.position
+            x = -(pos.x - self.win.width // 2)
+            y = -(pos.y - self.win.height // 2)
+            gl.glTranslatef(x, y, 0.0)
 
     def end(self):
         gl.glPopMatrix()

@@ -5,16 +5,14 @@ from pygd.track.mrg import MrgFile
 
 
 class TrackManager:
-    def __init__(self):
-        self.tracks = []
-        self.current = None
+    def __init__(self, level_filename):
+        self.level_filename = level_filename
+        self.level_idx = 0
+        self.track_idx = 0
+        self.current_track = None
 
         # Current track's pymunk segments
         self.segments = None
-
-    def add(self, track):
-        self.tracks.append(track)
-        return track
 
     def add_to_space(self, track, space):
         # Remove previous segments
@@ -34,7 +32,7 @@ class TrackManager:
             self.segments.append(segment)
             space.add(segment)
 
-    @staticmethod
-    def load_mrg_track(filepath, level=0, track=0):
-        mrg_file = MrgFile.from_file(filepath)
-        return mrg_file.read_track_from_file(level, track)
+    def load_mrg_track(self, level=0, track=0):
+        mrg_file = MrgFile.from_file(self.level_filename)
+        track = mrg_file.read_track_from_file(level, track)
+        self.current_track = track

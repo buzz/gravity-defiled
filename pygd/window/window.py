@@ -4,11 +4,11 @@ import pyglet
 import pyglet.gl as gl
 
 from pygd.bike import Bike
-from pygd.renderer.base import BaseWindow
-from pygd.renderer.poly_line import PolyLine
+from pygd.window.base import BaseWindow
+from pygd.window.poly_line import PolyLine
 
 
-class RendererWindow(BaseWindow):
+class MainWindow(BaseWindow):
     COLOR_BG = (1.0, 1.0, 1.0, 1.0)
 
     COLOR_TRACK = (0, 255, 0)
@@ -21,6 +21,7 @@ class RendererWindow(BaseWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.set_mouse_visible(False)
 
         gl.glClearColor(*self.COLOR_BG)
 
@@ -91,13 +92,16 @@ class RendererWindow(BaseWindow):
         )
 
     def draw_objects(self):
-        self.update_objects()
-        self.track_lines.draw()
-        self.bike_frame_lines.draw()
-        self.driver_head.draw()
-        self.batch_bike_sprites.draw()
+        if self.game.bike:
+            self.update_objects()
+            self.track_lines.draw()
+            self.bike_frame_lines.draw()
+            self.driver_head.draw()
+            self.batch_bike_sprites.draw()
 
     def draw_hud(self):
+        if self.game.current_menu:
+            self.game.current_menu.draw()
         self.batch_hud.draw()
 
     def update_objects(self):
