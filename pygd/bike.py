@@ -10,7 +10,7 @@ class Bike:
     JOINT_BREAK_THRESHOLD = 700000
     ACCEL_ANG_VEL = 2.0
     MAX_ANG_VEL = 20.0
-    BRAKE_FACTOR = 0.7
+    BRAKE_FACTOR = 0.4
     LEAN_SPEED_FORWARD = 0.4
     LEAN_SPEED_BACKWARD = 0.05
 
@@ -42,13 +42,14 @@ class Bike:
     DRIVER_JOINT_DIST_R = 90.0
     DRIVER_COLLISION_TYPE = 2
 
+    CONTROLS_DEAD_ZONE = 0.05
+
     def __init__(self, game, start_pos, space):
         self.game = game
         self.space = space
         self.start_pos = start_pos
         self.bike_broken = False
         self.driver_crash = False
-        self.driver_lean = 0.0
         self.wheel_r_coll = 0  # collision counter
 
         self.filter_group = pymunk.ShapeFilter(group=1)
@@ -74,7 +75,10 @@ class Bike:
             self.frame_body,
             self.frame_shape,
             *self.frame_joints,
+            *self.driver_joints,
         )
+        del self.wheels_r_coll_handler
+        del self.driver_coll_handler
 
     def create_wheels(self):
         for (pos, mass) in (
@@ -95,11 +99,11 @@ class Bike:
             self.space.add(wheel_body, wheel_shape)
 
         self.wheels_shape[1].collision_type = self.WHEEL_R_COLLISION_TYPE
-        handler = self.space.add_collision_handler(
+        self.wheels_r_coll_handler = self.space.add_collision_handler(
             self.WHEEL_R_COLLISION_TYPE, Track.COLLISION_TYPE
         )
-        handler.begin = self.coll_wheel_r_ground_begin
-        handler.separate = self.coll_wheel_r_ground_separate
+        self.wheels_r_coll_handler.begin = self.coll_wheel_r_ground_begin
+        self.wheels_r_coll_handler.separate = self.coll_wheel_r_ground_separate
 
     def create_frame(self):
         moment = pymunk.moment_for_poly(self.FRAME_MASS, self.FRAME_POINTS)
@@ -120,10 +124,10 @@ class Bike:
         self.space.add(self.driver_body, self.driver_shape)
 
         self.driver_shape.collision_type = self.DRIVER_COLLISION_TYPE
-        handler = self.space.add_collision_handler(
+        self.driver_coll_handler = self.space.add_collision_handler(
             self.DRIVER_COLLISION_TYPE, Track.COLLISION_TYPE
         )
-        handler.begin = self.coll_driver_ground_begin
+        self.driver_coll_handler.begin = self.coll_driver_ground_begin
 
     def create_frame_joints(self):
         self.frame_joints = [
@@ -182,41 +186,32 @@ class Bike:
         self.check_joint_break(delta_t)
 
     def apply_control_inputs(self, game):
-        # Accelerate/braking
-        if game.accelerating:
-            self.wheels_body[0].angular_velocity += self.ACCEL_ANG_VEL
-        if game.braking and abs(self.wheels_body[0].angular_velocity) > 0.15:
-            self.wheels_body[0].angular_velocity *= self.BRAKE_FACTOR
+        accel = game.controls.accelerating
+        braking_l = game.controls.braking_l
+        braking_r = game.controls.braking_r
 
+        # Accelerate/braking
+        if accel > self.CONTROLS_DEAD_ZONE:
+            self.wheels_body[0].angular_velocity += accel * self.ACCEL_ANG_VEL
+        if (
+            braking_l > self.CONTROLS_DEAD_ZONE
+            and abs(self.wheels_body[0].angular_velocity) > 0.15
+        ):
+            self.wheels_body[0].angular_velocity *= 1.0 - braking_l * (
+                1.0 - self.BRAKE_FACTOR
+            )
+        if (
+            braking_r > self.CONTROLS_DEAD_ZONE
+            and abs(self.wheels_body[1].angular_velocity) > 0.15
+        ):
+            self.wheels_body[1].angular_velocity *= 1.0 - braking_r * (
+                1.0 - self.BRAKE_FACTOR
+            )
         # Limit max. wheel velocity
         if self.wheels_body[0].angular_velocity > self.MAX_ANG_VEL:
             self.wheels_body[0].angular_velocity = self.MAX_ANG_VEL
         elif self.wheels_body[0].angular_velocity < -self.MAX_ANG_VEL:
             self.wheels_body[0].angular_velocity = -self.MAX_ANG_VEL
-
-        # Leaning (keyboard logic)
-        if game.leaning_l:
-            if self.driver_lean > 0.0:
-                self.driver_lean = 0.0
-            else:
-                self.driver_lean -= self.LEAN_SPEED_BACKWARD
-        elif game.leaning_r:
-            if self.driver_lean < 0.0:
-                self.driver_lean = 0.0
-            else:
-                self.driver_lean += self.LEAN_SPEED_FORWARD
-        else:
-            # Auto-center driver if not leaning
-            if abs(self.driver_lean) < 0.05:
-                self.driver_lean = 0.0
-            else:
-                self.driver_lean *= 0.6
-
-        # Keep driver_lean within (-1, 1)
-        if self.driver_lean > 1.0:
-            self.driver_lean = 1.0
-        elif self.driver_lean < -1.0:
-            self.driver_lean = -1.0
 
     def apply_lean(self):
         l = self.driver_lean
@@ -226,7 +221,7 @@ class Bike:
             self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 36.0
             # Bike tilting to make it easier to counter back flipping (e.g. in
             # wheelie or in air)
-            if self.wheel_r_coll == 0:
+            if self.wheel_r_coll == 0:  # only when front wheel doesn't touch ground
                 self.tilt(10.0)
         elif l < 0.0:
             self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L + l * 22.0
@@ -251,6 +246,10 @@ class Bike:
         force = Vec2d(3.5 * amount, 0.0)
         force = force.rotated(-self.angle)
         wheel_l.apply_impulse_at_world_point(force, wheel_l.local_to_world((0.0, 0.0)))
+
+    @property
+    def driver_lean(self):
+        return self.game.controls.leaning
 
     @property
     def crashed(self):

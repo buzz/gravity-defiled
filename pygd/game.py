@@ -4,7 +4,7 @@ from pymunk.vec2d import Vec2d
 
 from pygd.bike import Bike
 from pygd.renderer import Camera, DebugRendererWindow, RendererWindow
-from pygd.input_handler import KeyboardInputHandler
+from pygd.input import GamepadInput, KeyboardInput
 from pygd.track import Track, TrackManager
 
 
@@ -45,23 +45,14 @@ class PyGd:
             height=self.SCREEN_SIZE[1],
             caption=caption,
         )
-        self.key_listener = KeyboardInputHandler(self, self.renderer)
-
-        # input states
-        self.accelerating = False
-        self.braking = False
-        self.leaning_l = False
-        self.leaning_r = False
+        self.keyboard_input = KeyboardInput(self, self.renderer)
+        # self.controls = self.keyboard_input
+        self.gamepad_input = GamepadInput(self)
+        self.controls = self.gamepad_input
 
     def run(self):
-        # self.start_test_level()
-        self.load_mrg(1, 1)
-        self.bike = Bike(self, self.track_manager.current.start, self.space)
-        self.step(self.timestep)
-        self.renderer.update_track(self.track_manager.current.points)
+        self.reset()
         pyglet.clock.schedule_interval(self.step, self.timestep)
-        self.renderer.show_message(self.track_manager.current.name)
-        self.playing = True
         pyglet.app.run()
 
     def load_mrg(self, level, track):
@@ -90,6 +81,16 @@ class PyGd:
         self.track_manager.add(track)
         self.track_manager.current = self.track_manager.tracks[0]
         self.track_manager.add_to_space(self.track_manager.current, self.space)
+
+    def reset(self):
+        # self.start_test_level()
+        self.load_mrg(1, 4)
+        del self.bike
+        self.bike = Bike(self, self.track_manager.current.start, self.space)
+        self.step(self.timestep)
+        self.renderer.update_track(self.track_manager.current.points)
+        self.renderer.show_message(self.track_manager.current.name)
+        self.playing = True
 
     def step(self, _):
         if not self.bike.crashed:
