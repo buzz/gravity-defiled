@@ -84,7 +84,7 @@ class PyGd:
 
     def restart(self):
         self.reset_bike()
-        self.menu_manager.hide()
+        self.menu_manager.delete()
         self.playing = True
         self.finished = False
         self.paused = False
@@ -139,7 +139,7 @@ class PyGd:
         if self.playing:
             if self.paused:
                 self.paused = False
-                self.menu_manager.hide()
+                self.menu_manager.delete()
             else:
                 self.paused = True
                 self.menu_manager.show("pause", "Pause")

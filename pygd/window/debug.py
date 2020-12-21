@@ -12,10 +12,9 @@ class DebugWindow(BaseWindow):
         self.fps_display.label.color = (255, 255, 255, 255)
         self.fps_display.label.font_size = 10
 
-    def draw_objects(self):
+    def on_draw(self):
+        self.clear()
         self.game.space.debug_draw(self.draw_options)
-
-    def draw_hud(self):
         self.fps_display.draw()
 
     def show_message(self, text, timeout):

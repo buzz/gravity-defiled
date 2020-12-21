@@ -29,11 +29,15 @@ class MenuItem:
             y=y,
             anchor_x="center",
             anchor_y="center",
+            batch=self.menu.game.win.batch_menu,
         )
         self.activate_func = activate_func
 
-    def draw(self):
-        self.text.draw()
+    def delete(self):
+        self.text.delete()
+
+    def set_selected(self, selected):
+        self.text.color = FONT_COLOR_SELECTED if selected else FONT_COLOR
 
 
 class Menu:
@@ -51,27 +55,36 @@ class Menu:
             y=self.y_pos,
             anchor_x="center",
             anchor_y="center",
+            batch=self.game.win.batch_menu,
         )
         self.y_pos -= points_to_px(FONT_SIZE)
-        self.selected_idx = 0
+        self.select()
+
+    def delete(self):
+        self.title_text.delete()
+        for item in self.items:
+            item.delete()
 
     def add_menu_item(self, text, activate_func):
         self.y_pos -= points_to_px(FONT_SIZE) + MENU_ITEM_PADDING
         self.items.append(MenuItem(self, text, self.y_pos, activate_func))
+        self.select()
 
     def menu_up_down(self, inc):
-        new_idx = self.selected_idx + inc
-        self.selected_idx = min(max(new_idx, 0), len(self.items) - 1)
+        idx = self.selected_idx + inc
+        idx = min(max(idx, 0), len(self.items) - 1)
+        self.select(idx)
 
-    def draw(self):
-        self.title_text.draw()
-        for i, item in enumerate(self.items):
-            if i == self.selected_idx:
-                item.text.color = FONT_COLOR_SELECTED
-                item.draw()
-                item.text.color = FONT_COLOR
-            else:
-                item.draw()
+    def select(self, idx=None):
+        if idx is None:
+            try:
+                self.items[self.selected_idx].set_selected(True)
+            except IndexError:
+                pass
+        else:
+            self.items[self.selected_idx].set_selected(False)
+            self.selected_idx = idx
+            self.items[self.selected_idx].set_selected(True)
 
     # Events
 

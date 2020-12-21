@@ -21,10 +21,11 @@ class MenuManager:
     def show(self, menu_name, title):
         menu = MENUS[menu_name]
         if self.current:
-            self.hide()
+            self.delete()
         self.current = menu(self.game, title)
         self.game.user_control.push_handlers(self.current)
 
-    def hide(self):
+    def delete(self):
         self.game.user_control.remove_handlers(self.current)
+        self.current.delete()
         self.current = None
