@@ -3,8 +3,6 @@ import math
 import pymunk
 from pymunk.vec2d import Vec2d
 
-from pygd.track import Track
-
 
 class Bike:
     JOINT_BREAK_THRESHOLD = 700000
@@ -44,10 +42,9 @@ class Bike:
 
     CONTROLS_DEAD_ZONE = 0.05
 
-    def __init__(self, game, start_pos, space):
+    def __init__(self, game, space):
         self.game = game
         self.space = space
-        self.start_pos = start_pos
         self.bike_broken = False
         self.driver_crash = False
         self.wheel_r_coll = 0  # collision counter
@@ -68,18 +65,6 @@ class Bike:
         self.create_frame_joints()
         self.create_driver_joints()
 
-    def __del__(self):
-        self.space.remove(
-            *self.wheels_body,
-            *self.wheels_shape,
-            self.frame_body,
-            self.frame_shape,
-            *self.frame_joints,
-            *self.driver_joints,
-        )
-        del self.wheels_r_coll_handler
-        del self.driver_coll_handler
-
     def create_wheels(self):
         for (pos, mass) in (
             (self.WHEEL_L_POS, self.WHEEL_L_MASS),
@@ -99,11 +84,6 @@ class Bike:
             self.space.add(wheel_body, wheel_shape)
 
         self.wheels_shape[1].collision_type = self.WHEEL_R_COLLISION_TYPE
-        self.wheels_r_coll_handler = self.space.add_collision_handler(
-            self.WHEEL_R_COLLISION_TYPE, Track.COLLISION_TYPE
-        )
-        self.wheels_r_coll_handler.begin = self.coll_wheel_r_ground_begin
-        self.wheels_r_coll_handler.separate = self.coll_wheel_r_ground_separate
 
     def create_frame(self):
         moment = pymunk.moment_for_poly(self.FRAME_MASS, self.FRAME_POINTS)
@@ -121,13 +101,8 @@ class Bike:
         self.driver_shape.friction = self.DRIVER_FRICTION
         self.driver_body.position = self.start_pos + self.DRIVER_POS
         self.driver_shape.filter = self.filter_group
-        self.space.add(self.driver_body, self.driver_shape)
-
         self.driver_shape.collision_type = self.DRIVER_COLLISION_TYPE
-        self.driver_coll_handler = self.space.add_collision_handler(
-            self.DRIVER_COLLISION_TYPE, Track.COLLISION_TYPE
-        )
-        self.driver_coll_handler.begin = self.coll_driver_ground_begin
+        self.space.add(self.driver_body, self.driver_shape)
 
     def create_frame_joints(self):
         self.frame_joints = [
@@ -180,15 +155,27 @@ class Bike:
         ]
         self.space.add(*self.driver_joints)
 
+    def remove(self):
+        self.space.remove(
+            *self.wheels_body,
+            *self.wheels_shape,
+            self.frame_body,
+            self.frame_shape,
+            self.driver_body,
+            self.driver_shape,
+            *self.frame_joints,
+            *self.driver_joints,
+        )
+
     def update(self, game, delta_t):
         self.apply_control_inputs(game)
         self.apply_lean()
         self.check_joint_break(delta_t)
 
     def apply_control_inputs(self, game):
-        accel = game.controls.accelerating
-        braking_l = game.controls.braking_l
-        braking_r = game.controls.braking_r
+        accel = game.user_control.accelerating
+        braking_l = game.user_control.braking_l
+        braking_r = game.user_control.braking_r
 
         # Accelerate/braking
         if accel > self.CONTROLS_DEAD_ZONE:
@@ -249,7 +236,7 @@ class Bike:
 
     @property
     def driver_lean(self):
-        return self.game.controls.leaning
+        return self.game.user_control.leaning
 
     @property
     def crashed(self):
@@ -263,15 +250,15 @@ class Bike:
     def angle_mod2pi(self):
         return self.angle % (-2.0 * math.pi)
 
-    # Collision events
+    @property
+    def start_pos(self):
+        return self.game.track_manager.current_track.start
 
-    def coll_wheel_r_ground_begin(self, *_):
+    def on_wheel_r_ground_collision_begin(self):
         self.wheel_r_coll += 1
-        return True
 
-    def coll_wheel_r_ground_separate(self, *_):
+    def on_wheel_r_ground_collision_separate(self):
         self.wheel_r_coll -= 1
 
-    def coll_driver_ground_begin(self, *_):
+    def on_driver_ground_collision_begin(self):
         self.driver_crash = True
-        return True

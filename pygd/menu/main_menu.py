@@ -6,7 +6,7 @@ class MainMenu(Menu):
         super().__init__(*args, **kwargs)
 
         self.add_menu_item("New Game", self.new_game)
-        self.add_menu_item("Quit", self.win.close)
+        self.add_menu_item("Quit", self.game.quit)
 
     def new_game(self):
-        self.win.game.start_track(0, 0)
+        self.game.start_track(0, 0)

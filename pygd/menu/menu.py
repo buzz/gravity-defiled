@@ -1,5 +1,4 @@
 import pyglet
-from pyglet.window import key
 
 
 FONT_COLOR = (0, 0, 0, 255)
@@ -25,7 +24,7 @@ class MenuItem:
             color=FONT_COLOR,
             font_name=FONT_NAME,
             font_size=FONT_SIZE,
-            x=self.menu.win.width // 2,
+            x=self.menu.game.win.width // 2,
             y=y,
             anchor_x="center",
             anchor_y="center",
@@ -35,23 +34,19 @@ class MenuItem:
     def draw(self):
         self.text.draw()
 
-    def on_key_release(self, symbol, _):
-        if symbol == key.ENTER and self.activate_func:
-            self.activate_func()
-
 
 class Menu:
-    def __init__(self, win, title):
-        self.win = win
+    def __init__(self, game, title):
+        self.game = game
         self.selected_idx = 0
         self.items = []
-        self.y_pos = self.win.height - self.win.height // 5
+        self.y_pos = self.game.win.height - self.game.win.height // 5
         self.title_text = pyglet.text.Label(
             title,
             color=FONT_COLOR,
             font_name=FONT_NAME,
             font_size=FONT_SIZE * 1.8,
-            x=self.win.width // 2,
+            x=self.game.win.width // 2,
             y=self.y_pos,
             anchor_x="center",
             anchor_y="center",
@@ -63,15 +58,9 @@ class Menu:
         self.y_pos -= points_to_px(FONT_SIZE) + MENU_ITEM_PADDING
         self.items.append(MenuItem(self, text, self.y_pos, activate_func))
 
-    def on_key_press(self, symbol, _):
-        if symbol == key.DOWN:
-            self.selected_idx += 1
-        elif symbol == key.UP:
-            self.selected_idx -= 1
-        self.selected_idx = min(max(self.selected_idx, 0), len(self.items) - 1)
-
-    def on_key_release(self, symbol, modifiers):
-        self.items[self.selected_idx].on_key_release(symbol, modifiers)
+    def menu_up_down(self, inc):
+        new_idx = self.selected_idx + inc
+        self.selected_idx = min(max(new_idx, 0), len(self.items) - 1)
 
     def draw(self):
         self.title_text.draw()
@@ -82,3 +71,14 @@ class Menu:
                 item.text.color = FONT_COLOR
             else:
                 item.draw()
+
+    # Events
+
+    def on_menu_up(self):
+        self.menu_up_down(-1)
+
+    def on_menu_down(self):
+        self.menu_up_down(1)
+
+    def on_menu_confirm(self):
+        self.items[self.selected_idx].activate_func()

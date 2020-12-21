@@ -12,6 +12,8 @@ class BaseWindow(Window):
         self.to_pymunk_coords = ToPymunkCoords(self)
         self.world_camera = WorldCamera(self)
 
+        self.set_mouse_visible(False)
+
     def on_draw(self):
         self.clear()
 

@@ -21,7 +21,6 @@ class MainWindow(BaseWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.set_mouse_visible(False)
 
         gl.glClearColor(*self.COLOR_BG)
 
@@ -125,3 +124,9 @@ class MainWindow(BaseWindow):
         x, y = self.game.bike.driver_body.position
         self.driver_head.x = x
         self.driver_head.y = y
+
+    def on_key_press(self, symbol, modifiers):
+        # Prevent default action: close window on escape
+        if symbol == pyglet.window.key.ESCAPE:
+            return pyglet.event.EVENT_HANDLED
+        return None

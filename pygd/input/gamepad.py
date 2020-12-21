@@ -12,60 +12,43 @@ from pygd.input.base import BaseInput
 
 
 class GamepadInput(BaseInput):
-    def __init__(self, game, gamepad_num=0):
-        super().__init__(game)
+    DEAD_ZONE = 0.05
 
-        self._accelerating = 0.0
-        self._braking_l = 0.0
-        self._braking_r = 0.0
-        self._leaning = 0.0
+    def __init__(self, user_control, gamepad_num=0):
+        super().__init__(user_control)
 
-        gamepads = get_joysticks()
+        gamepads = get_joysticks()  # pylint: disable=assignment-from-no-return
         if not gamepads:
             raise RuntimeError("No gamepad found!")
 
         self.gamepad = gamepads[gamepad_num]
         self.gamepad.open()
         self.gamepad.set_handler("on_joybutton_press", self.on_joybutton_press)
-        self.gamepad.set_handler("on_joybutton_release", self.on_joybutton_release)
-        self.gamepad.set_handler("on_joyaxis_motion", self.on_joyaxis_motion)
-
-    def __del__(self):
-        self.gamepad.remove_handler("on_joybutton_press", self.on_joybutton_press)
-        self.gamepad.remove_handler("on_joybutton_release", self.on_joybutton_release)
         self.gamepad.set_handler("on_joyaxis_motion", self.on_joyaxis_motion)
 
     def on_joybutton_press(self, _, button):
-        # print("button press:", button)
-        pass
+        if button == 0:
+            self.user_control.menu_confirm()
+        if button == 1:
+            self.user_control.menu_back()
+        elif button == 7:
+            self.user_control.pause()
 
-    def on_joybutton_release(self, _, button):
-        # print("button release:", button)
-        if button == 6:
-            self.game.reset()
-
-    def on_joyaxis_motion(self, _, axis, value):
-        if axis == "ry":
-            self._accelerating = max(0.0, -value)
+    def on_joyaxis_motion(self, _, axis, val):
+        if axis == "x":
+            self.user_control.leaning = val
+        elif axis == "ry":
+            self.user_control.accelerating = max(0.0, -val)
         elif axis == "z":
-            self._braking_l = (value + 1.0) / 2.0
+            self.user_control.braking_l = (val + 1.0) / 2.0
         elif axis == "rz":
-            self._braking_r = (value + 1.0) / 2.0
-        elif axis == "x":
-            self._leaning = value
-
-    @property
-    def accelerating(self):
-        return self._accelerating
-
-    @property
-    def braking_l(self):
-        return self._braking_l
-
-    @property
-    def braking_r(self):
-        return self._braking_r
-
-    @property
-    def leaning(self):
-        return self._leaning
+            self.user_control.braking_r = (val + 1.0) / 2.0
+        elif axis == "hat_x":
+            self.user_control.leaning = val
+        elif axis == "hat_y":
+            if val > self.DEAD_ZONE:
+                self.user_control.accelerating = max(0.0, val)
+                self.user_control.menu_up()
+            elif val < -self.DEAD_ZONE:
+                self.user_control.braking_l = max(0.0, val)
+                self.user_control.menu_down()

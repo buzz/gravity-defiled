@@ -1,4 +1,3 @@
-from pygd.input.gamepad import GamepadInput
-from pygd.input.keyboard import KeyboardInput
+from pygd.input.user_control import UserControl
 
-__all__ = ["GamepadInput", "KeyboardInput"]
+__all__ = ["UserControl"]
