@@ -89,7 +89,7 @@ class PyGd:
 
     def run(self):
         self.win = self.create_window()
-        self.user_control = UserControl(self.win)
+        self.user_control = UserControl(self)
         self.user_control.set_handler("on_pause", self.on_pause)
         self.space = self.create_space()
         self.show_main_menu()

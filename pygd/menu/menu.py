@@ -2,7 +2,7 @@ import pyglet
 
 
 FONT_COLOR = (0, 0, 0, 255)
-FONT_COLOR_SELECTED = (255, 0, 0, 255)
+FONT_COLOR_SELECTED = (200, 0, 0, 255)
 FONT_NAME = ("Verdana", "Helvetica", "Arial")
 FONT_SIZE = 20
 MENU_ITEM_PADDING = 20

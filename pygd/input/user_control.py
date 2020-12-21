@@ -5,8 +5,8 @@ from pygd.input.keyboard import KeyboardInput
 
 
 class UserControl(EventDispatcher):
-    def __init__(self, win):
-        self.keyboard_input = KeyboardInput(self, win)
+    def __init__(self, game):
+        self.keyboard_input = KeyboardInput(self, game)
         self.gamepad_input = GamepadInput(self)
 
         self.accelerating = 0.0
