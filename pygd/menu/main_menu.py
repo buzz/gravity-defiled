@@ -9,4 +9,4 @@ class MainMenu(Menu):
         self.add_menu_item("Quit", self.game.quit)
 
     def new_game(self):
-        self.game.start_track(0, 0)
+        self.game.start_track()

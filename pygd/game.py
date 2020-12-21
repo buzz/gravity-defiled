@@ -15,8 +15,8 @@ class PyGd:
     SCREEN_SIZE = (1600, 900)
     TITLE = "Gravity Defiled"
 
-    def __init__(self, debug_render=False):
-        self.debug_render = debug_render
+    def __init__(self, level=None, track=None, debug=False):
+        self.debug_render = debug
 
         pyglet.resource.path = ["res"]
         pyglet.resource.reindex()
@@ -29,7 +29,9 @@ class PyGd:
         self.bike = None
         self.menu_manager = MenuManager(self)
         self.space = None
-        self.track_manager = TrackManager("levels.mrg")
+        level_idx = level - 1 if level is not None else None
+        track_idx = track - 1 if track is not None else None
+        self.track_manager = TrackManager("levels.mrg", level_idx, track_idx)
         self.user_control = None
         self.win = None
 
@@ -74,11 +76,11 @@ class PyGd:
         self.space = self.create_space()
         self.show_main_menu()
         if self.debug_render:
-            self.start_track(0, 0)
+            self.start_track()
         pyglet.clock.schedule_interval(self.step, self.timestep)
         pyglet.app.run()
 
-    def start_track(self, level, track):
+    def start_track(self, level=None, track=None):
         self.track_manager.load_mrg_track(level, track)
         self.track_manager.add_to_space(self.track_manager.current, self.space)
         self.win.update_track(self.track_manager.current)
