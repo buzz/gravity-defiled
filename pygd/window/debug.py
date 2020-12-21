@@ -14,7 +14,9 @@ class DebugWindow(BaseWindow):
 
     def on_draw(self):
         self.clear()
+        self.group_world_camera.set_state_recursive()
         self.game.space.debug_draw(self.draw_options)
+        self.group_world_camera.unset_state_recursive()
         self.fps_display.draw()
 
     def show_message(self, text, timeout):

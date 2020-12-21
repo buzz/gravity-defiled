@@ -73,6 +73,8 @@ class PyGd:
         self.user_control.set_handler("on_pause", self.on_pause)
         self.space = self.create_space()
         self.show_main_menu()
+        if self.debug_render:
+            self.start_track(0, 0)
         pyglet.clock.schedule_interval(self.step, self.timestep)
         pyglet.app.run()
 
