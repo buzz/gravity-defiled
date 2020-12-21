@@ -8,6 +8,13 @@ from pygd.window.base import BaseWindow
 from pygd.window.poly_line import PolyLine
 from pygd.menu import FONT_COLOR, FONT_NAME, FONT_SIZE_BIG
 
+GL_CONFIG = {
+    "depth_size": 0,
+    "double_buffer": True,
+    "sample_buffers": 1,
+    "samples": 8,
+}
+
 
 class MainWindow(BaseWindow):
     COLOR_BG = (1.0, 1.0, 1.0, 1.0)
@@ -23,8 +30,7 @@ class MainWindow(BaseWindow):
     COLOR_FINISH = (0, 0, 255)
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+        super().__init__(config=pyglet.gl.Config(**GL_CONFIG), *args, **kwargs)
         gl.glClearColor(*self.COLOR_BG)
 
         # Enable alpha blending
