@@ -96,29 +96,7 @@ class PyGd:
         pyglet.clock.schedule_interval(self.step, self.timestep)
         pyglet.app.run()
 
-    # def start_test_level(self):
-    #     points = (
-    #         (-200, 880),
-    #         (100, 880),
-    #         (300, 870),
-    #         (350, 865),
-    #         (400, 855),
-    #         (500, 810),
-    #         (600, 760),
-    #         (700, 700),
-    #         (750, 820),
-    #         (800, 810),
-    #         (850, 800),
-    #         (900, 790),
-    #         (1800, 780),
-    #     )
-    #     track = Track(points, Vec2d(0, 860), Vec2d(1500, 860))
-    #     self.track_manager.add(track)
-    #     self.track_manager.current = self.track_manager.tracks[0]
-    #     self.track_manager.add_to_space(self.track_manager.current, self.space)
-
     def start_track(self, level, track):
-        # self.start_test_level()
         self.track_manager.load_mrg_track(level, track)
         self.track_manager.add_to_space(self.track_manager.current_track, self.space)
         self.win.update_track(self.track_manager.current_track)
