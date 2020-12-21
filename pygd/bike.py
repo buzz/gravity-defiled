@@ -260,7 +260,7 @@ class Bike:
 
     @property
     def start_pos(self):
-        return self.game.track_manager.current_track.start
+        return self.game.track_manager.current.start
 
     @property
     def bike_right(self):

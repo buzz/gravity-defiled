@@ -3,7 +3,7 @@ import pyglet
 
 from pygd.bike import Bike
 from pygd.input import UserControl
-from pygd.menu import GameEndMenu, MainMenu, PauseMenu
+from pygd.menu import MenuManager
 from pygd.window import DebugWindow, MainWindow
 from pygd.track import TrackManager, Track
 
@@ -26,32 +26,12 @@ class PyGd:
         self.finished = False
         self.paused = False
 
+        self.bike = None
+        self.menu_manager = MenuManager(self)
         self.space = None
         self.track_manager = TrackManager("levels.mrg")
-        self.bike = None
-        self.current_menu = None
-        self.win = None
         self.user_control = None
-
-    def show_main_menu(self):
-        self.remove_bike()
-        self.show_menu(MainMenu(self, self.TITLE))
-
-    def show_pause_menu(self):
-        self.show_menu(PauseMenu(self, "Pause"))
-
-    def show_game_end_menu(self, _, title):
-        self.show_menu(GameEndMenu(self, title))
-
-    def show_menu(self, menu):
-        if self.current_menu:
-            self.hide_menu()
-        self.current_menu = menu
-        self.user_control.push_handlers(self.current_menu)
-
-    def hide_menu(self):
-        self.user_control.remove_handlers(self.current_menu)
-        self.current_menu = None
+        self.win = None
 
     def create_space(self):
         space = pymunk.Space(threaded=True)
@@ -98,17 +78,17 @@ class PyGd:
 
     def start_track(self, level, track):
         self.track_manager.load_mrg_track(level, track)
-        self.track_manager.add_to_space(self.track_manager.current_track, self.space)
-        self.win.update_track(self.track_manager.current_track)
+        self.track_manager.add_to_space(self.track_manager.current, self.space)
+        self.win.update_track(self.track_manager.current)
         self.restart()
 
     def restart(self):
         self.reset_bike()
-        self.hide_menu()
+        self.menu_manager.hide()
         self.playing = True
         self.finished = False
         self.paused = False
-        self.win.show_message(self.track_manager.current_track.name, timeout=2.5)
+        self.win.show_message(self.track_manager.current.name, timeout=2.5)
 
     def remove_bike(self):
         if self.bike:
@@ -131,7 +111,7 @@ class PyGd:
                 self.win.show_message(text, timeout=timeout)
                 pyglet.clock.schedule_once(self.show_game_end_menu, 0.8, text)
             elif self.playing and not self.paused:
-                if self.track_manager.current_track.is_finished(self.bike):
+                if self.track_manager.current.is_finished(self.bike):
                     self.playing = False
                     self.finished = True
                     timeout = 2.0
@@ -144,16 +124,25 @@ class PyGd:
         if not self.paused:
             self.space.step(self.timestep)
 
+    # Menus
+
+    def show_main_menu(self):
+        self.remove_bike()
+        self.menu_manager.show("main", self.TITLE)
+
+    def show_game_end_menu(self, _, title):
+        self.menu_manager.show("game_end", title)
+
     # Events
 
     def on_pause(self):
         if self.playing:
             if self.paused:
                 self.paused = False
-                self.hide_menu()
+                self.menu_manager.hide()
             else:
                 self.paused = True
-                self.show_pause_menu()
+                self.menu_manager.show("pause", "Pause")
 
     # Physics events
 

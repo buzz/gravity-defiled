@@ -1,5 +1,4 @@
-from pygd.menu.game_end_menu import GameEndMenu
-from pygd.menu.main_menu import MainMenu
-from pygd.menu.pause_menu import PauseMenu
+from pygd.menu.manager import MenuManager
+from pygd.menu.menu import FONT_COLOR, FONT_NAME, FONT_SIZE_BIG
 
-__all__ = ["GameEndMenu", "MainMenu", "PauseMenu"]
+__all__ = ["FONT_COLOR", "FONT_NAME", "FONT_SIZE_BIG", "MenuManager"]

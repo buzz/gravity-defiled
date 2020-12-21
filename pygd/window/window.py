@@ -6,6 +6,7 @@ import pyglet.gl as gl
 from pygd.bike import Bike
 from pygd.window.base import BaseWindow
 from pygd.window.poly_line import PolyLine
+from pygd.menu import FONT_COLOR, FONT_NAME, FONT_SIZE_BIG
 
 
 class MainWindow(BaseWindow):
@@ -62,9 +63,9 @@ class MainWindow(BaseWindow):
         self.batch_hud = pyglet.graphics.Batch()
         self.message_label = pyglet.text.Label(
             "",
-            color=(0, 0, 0, 255),
-            font_name="Arial",
-            font_size=36,
+            color=FONT_COLOR,
+            font_name=FONT_NAME,
+            font_size=FONT_SIZE_BIG,
             x=self.width // 2,
             y=self.height // 4,
             anchor_x="center",
@@ -106,8 +107,8 @@ class MainWindow(BaseWindow):
             self.batch_bike_sprites.draw()
 
     def draw_hud(self):
-        if self.game.current_menu:
-            self.game.current_menu.draw()
+        if self.game.menu_manager.current:
+            self.game.menu_manager.current.draw()
         self.batch_hud.draw()
 
     def update_objects(self):

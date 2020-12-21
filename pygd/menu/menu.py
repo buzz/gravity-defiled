@@ -1,10 +1,11 @@
 import pyglet
 
 
-FONT_COLOR = (0, 0, 0, 255)
+FONT_COLOR = (60, 60, 60, 255)
 FONT_COLOR_SELECTED = (200, 0, 0, 255)
-FONT_NAME = ("Verdana", "Helvetica", "Arial")
+FONT_NAME = "Walter Turncoat"
 FONT_SIZE = 20
+FONT_SIZE_BIG = 36
 MENU_ITEM_PADDING = 20
 
 
@@ -45,7 +46,7 @@ class Menu:
             title,
             color=FONT_COLOR,
             font_name=FONT_NAME,
-            font_size=FONT_SIZE * 1.8,
+            font_size=FONT_SIZE_BIG,
             x=self.game.win.width // 2,
             y=self.y_pos,
             anchor_x="center",

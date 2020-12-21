@@ -27,7 +27,7 @@ class KeyboardInput(BaseInput):
         elif symbol == key.P:
             self.user_control.pause()
         elif symbol == key.ESCAPE:
-            if self.game.current_menu:
+            if self.game.menu_manager.current:
                 self.user_control.menu_back()
             elif self.game.playing:
                 self.user_control.pause()

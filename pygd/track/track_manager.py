@@ -9,7 +9,7 @@ class TrackManager:
         self.level_filename = level_filename
         self.level_idx = 0
         self.track_idx = 0
-        self.current_track = None
+        self.current = None
 
         # Current track's pymunk segments
         self.segments = None
@@ -35,4 +35,4 @@ class TrackManager:
     def load_mrg_track(self, level=0, track=0):
         mrg_file = MrgFile.from_file(self.level_filename)
         track = mrg_file.read_track_from_file(level, track)
-        self.current_track = track
+        self.current = track
