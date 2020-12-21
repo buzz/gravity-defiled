@@ -13,12 +13,12 @@ class DebugWindow(BaseWindow):
         self.fps_display.label.font_size = 10
 
     def draw_objects(self):
-        self.space.debug_draw(self.draw_options)
+        self.game.space.debug_draw(self.draw_options)
 
     def draw_hud(self):
         self.fps_display.draw()
 
-    def show_message(self, text, auto_clear=True):
+    def show_message(self, text, timeout):
         print(f"DEBUG: show_message '{text}'")
 
     def update_track(self, track):

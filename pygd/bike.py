@@ -172,6 +172,13 @@ class Bike:
         self.apply_lean()
         self.check_joint_break(delta_t)
 
+    def update_when_finished(self, delta_t):
+        """Relax and gently stop bike when finished."""
+        self.wheels_body[0].angular_velocity *= 0.95
+        self.wheels_body[1].angular_velocity *= 0.95
+        self.apply_lean(0.0)
+        self.check_joint_break(delta_t)
+
     def apply_control_inputs(self, game):
         accel = game.user_control.accelerating
         braking_l = game.user_control.braking_l
@@ -200,8 +207,9 @@ class Bike:
         elif self.wheels_body[0].angular_velocity < -self.MAX_ANG_VEL:
             self.wheels_body[0].angular_velocity = -self.MAX_ANG_VEL
 
-    def apply_lean(self):
-        l = self.driver_lean
+    def apply_lean(self, l=None):
+        if l is None:
+            l = self.driver_lean
 
         if l > 0.0:
             self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L - l * 1.0
@@ -253,6 +261,15 @@ class Bike:
     @property
     def start_pos(self):
         return self.game.track_manager.current_track.start
+
+    @property
+    def bike_right(self):
+        """The outmost right edge x coord."""
+        wheels_right = map(
+            lambda w: w.position[0] + self.WHEEL_RADIUS, self.wheels_body
+        )
+        driver_right = self.driver_body.position[0] + self.DRIVER_RADIUS
+        return max((*wheels_right, driver_right))
 
     def on_wheel_r_ground_collision_begin(self):
         self.wheel_r_coll += 1

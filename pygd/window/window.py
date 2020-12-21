@@ -21,8 +21,6 @@ class MainWindow(BaseWindow):
     COLOR_START = (255, 0, 0)
     COLOR_FINISH = (0, 0, 255)
 
-    MESSAGE_TIMEOUT = 2.5
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -74,11 +72,10 @@ class MainWindow(BaseWindow):
             batch=self.batch_hud,
         )
 
-    def show_message(self, text, auto_clear=True):
+    def show_message(self, text, timeout):
         self.message_label.text = text
         self.message_label.visible = True
-        if auto_clear:
-            pyglet.clock.schedule_once(self.clear_message, self.MESSAGE_TIMEOUT)
+        pyglet.clock.schedule_once(self.clear_message, timeout)
 
     def clear_message(self, _):
         self.message_label.text = ""
@@ -93,12 +90,10 @@ class MainWindow(BaseWindow):
         self.track_lines = PolyLine(
             track.points, line_width=self.LINE_WIDTH_TRACK, color=self.COLOR_TRACK
         )
-        start_line = track.get_start_line()
-        self.start.x, self.start.y = start_line
-        self.start.x2, self.start.y2 = start_line - (0, self.POLE_HEIGHT)
-        finish_line = track.get_finish_line()
-        self.finish.x, self.finish.y = finish_line
-        self.finish.x2, self.finish.y2 = finish_line - (0, self.POLE_HEIGHT)
+        self.start.x, self.start.y = track.start_line
+        self.start.x2, self.start.y2 = track.start_line - (0, self.POLE_HEIGHT)
+        self.finish.x, self.finish.y = track.finish_line
+        self.finish.x2, self.finish.y2 = track.finish_line - (0, self.POLE_HEIGHT)
 
     def draw_objects(self):
         if self.game.bike:

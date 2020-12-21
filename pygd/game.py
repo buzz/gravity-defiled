@@ -23,6 +23,7 @@ class PyGd:
 
         self.timestep = 1.0 / self.FPS
         self.playing = False
+        self.finished = False
         self.paused = False
 
         self.space = None
@@ -39,8 +40,7 @@ class PyGd:
     def show_pause_menu(self):
         self.show_menu(PauseMenu(self, "Pause"))
 
-    def show_game_end_menu(self, _):
-        title = "Crashed!" if self.bike.crashed else "Finish!"
+    def show_game_end_menu(self, _, title):
         self.show_menu(GameEndMenu(self, title))
 
     def show_menu(self, menu):
@@ -128,8 +128,9 @@ class PyGd:
         self.reset_bike()
         self.hide_menu()
         self.playing = True
+        self.finished = False
         self.paused = False
-        self.win.show_message(self.track_manager.current_track.name)
+        self.win.show_message(self.track_manager.current_track.name, timeout=2.5)
 
     def remove_bike(self):
         if self.bike:
@@ -147,9 +148,21 @@ class PyGd:
         if self.bike:
             if self.bike.crashed and self.playing:
                 self.playing = False
-                pyglet.clock.schedule_once(self.show_game_end_menu, 0.8)
+                timeout = 0.8
+                text = "Crashed!"
+                self.win.show_message(text, timeout=timeout)
+                pyglet.clock.schedule_once(self.show_game_end_menu, 0.8, text)
             elif self.playing and not self.paused:
+                if self.track_manager.current_track.is_finished(self.bike):
+                    self.playing = False
+                    self.finished = True
+                    timeout = 2.0
+                    text = "Finished!"
+                    self.win.show_message(text, timeout=timeout)
+                    pyglet.clock.schedule_once(self.show_game_end_menu, timeout, text)
                 self.bike.update(self, self.timestep)
+            elif self.finished:
+                self.bike.update_when_finished(self.timestep)
         if not self.paused:
             self.space.step(self.timestep)
 
