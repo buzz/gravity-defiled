@@ -17,6 +17,10 @@ class MainWindow(BaseWindow):
     COLOR_BIKE_FRAME = (50, 50, 50)
     LINE_WIDTH_BIKE_FRAME = 1.0
 
+    POLE_HEIGHT = 100
+    COLOR_START = (255, 0, 0)
+    COLOR_FINISH = (0, 0, 255)
+
     MESSAGE_TIMEOUT = 2.5
 
     def __init__(self, *args, **kwargs):
@@ -29,8 +33,9 @@ class MainWindow(BaseWindow):
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
         self.config.alpha_size = 8
 
-        self.batch_track_line = None
         self.track_lines = None
+        self.start = pyglet.shapes.Line(0, 0, 0, 0, color=self.COLOR_START)
+        self.finish = pyglet.shapes.Line(0, 0, 0, 0, color=self.COLOR_FINISH)
 
         self.load_images()
 
@@ -84,16 +89,23 @@ class MainWindow(BaseWindow):
         self.img_wheel.anchor_x = self.img_wheel.width // 2
         self.img_wheel.anchor_y = self.img_wheel.height // 2
 
-    def update_track(self, points):
-        self.batch_track_line = pyglet.graphics.Batch()
+    def update_track(self, track):
         self.track_lines = PolyLine(
-            points, line_width=self.LINE_WIDTH_TRACK, color=self.COLOR_TRACK
+            track.points, line_width=self.LINE_WIDTH_TRACK, color=self.COLOR_TRACK
         )
+        start_line = track.get_start_line()
+        self.start.x, self.start.y = start_line
+        self.start.x2, self.start.y2 = start_line - (0, self.POLE_HEIGHT)
+        finish_line = track.get_finish_line()
+        self.finish.x, self.finish.y = finish_line
+        self.finish.x2, self.finish.y2 = finish_line - (0, self.POLE_HEIGHT)
 
     def draw_objects(self):
         if self.game.bike:
             self.update_objects()
             self.track_lines.draw()
+            self.start.draw()
+            self.finish.draw()
             self.bike_frame_lines.draw()
             self.driver_head.draw()
             self.batch_bike_sprites.draw()

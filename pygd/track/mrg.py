@@ -1,3 +1,11 @@
+"""
+MRG file reader.
+
+See:
+http://gdtr.net/handbook/mrg/
+https://wiki.gdmod.ru/Структура_файла_levels.mrg (Russian)
+"""
+
 import struct
 import os
 
@@ -76,7 +84,7 @@ class MrgFile:
             start_x = struct.unpack(">i", fin.read(4))[0]
             start_y = -struct.unpack(">i", fin.read(4))[0]
             finish_x = struct.unpack(">i", fin.read(4))[0]
-            finish_y = struct.unpack(">i", fin.read(4))[0]
+            _ = struct.unpack(">i", fin.read(4))[0]
             points_to_read = struct.unpack(">h", fin.read(2))[0]
             point_0_x = struct.unpack(">i", fin.read(4))[0]
             point_0_y = struct.unpack(">i", fin.read(4))[0]
@@ -103,7 +111,7 @@ class MrgFile:
                 self.header.names[level][track_num],
                 points,
                 self.scale_point(Vec2d(start_x, start_y)),
-                self.scale_point(Vec2d(finish_x, finish_y)),
+                self.scale_point(finish_x),
             )
 
     @classmethod

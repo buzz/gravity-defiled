@@ -21,5 +21,5 @@ class DebugWindow(BaseWindow):
     def show_message(self, text, auto_clear=True):
         print(f"DEBUG: show_message '{text}'")
 
-    def update_track(self, points):
+    def update_track(self, track):
         pass

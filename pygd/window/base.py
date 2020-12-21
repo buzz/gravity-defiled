@@ -32,5 +32,5 @@ class BaseWindow(Window):
     def show_message(self, text, auto_clear=True):
         raise NotImplementedError
 
-    def update_track(self, points):
+    def update_track(self, track):
         raise NotImplementedError

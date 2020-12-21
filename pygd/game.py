@@ -121,7 +121,7 @@ class PyGd:
         # self.start_test_level()
         self.track_manager.load_mrg_track(level, track)
         self.track_manager.add_to_space(self.track_manager.current_track, self.space)
-        self.win.update_track(self.track_manager.current_track.points)
+        self.win.update_track(self.track_manager.current_track)
         self.restart()
 
     def restart(self):
