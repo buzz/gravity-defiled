@@ -13,7 +13,7 @@ class PyGd:
     DAMPING = 0.95
     GRAVITY = (0.0, 450.0)
     SCREEN_SIZE = (1600, 900)
-    TITLE = "PyGD"
+    TITLE = "Gravity Defiled"
 
     def __init__(self, debug_render=False):
         self.debug_render = debug_render
