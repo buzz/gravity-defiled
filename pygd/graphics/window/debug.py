@@ -1,7 +1,7 @@
 from pyglet.window import FPSDisplay
 import pymunk.pyglet_util
 
-from pygd.window.base import BaseWindow
+from pygd.graphics.window.base import BaseWindow
 
 
 class DebugWindow(BaseWindow):
@@ -20,7 +20,7 @@ class DebugWindow(BaseWindow):
         self.fps_display.draw()
 
     def show_message(self, text, timeout):
-        print(f"DEBUG: show_message '{text}'")
+        print(f"DEBUG: show_message '{text}' (timeout={timeout})")
 
     def update_track(self, track):
         pass

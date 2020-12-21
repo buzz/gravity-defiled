@@ -52,12 +52,12 @@ class Bike:
         self.filter_group = pymunk.ShapeFilter(group=1)
         self.frame_body = None
         self.frame_shape = None
-        self.driver_body = None
-        self.driver_shape = None
+        self.driver_head_body = None
+        self.driver_head_shape = None
         self.wheels_body = []
         self.wheels_shape = []
         self.frame_joints = []
-        self.driver_joints = []
+        self.driver_head_joints = []
 
         self.create_wheels()
         self.create_frame()
@@ -96,13 +96,15 @@ class Bike:
 
     def create_driver(self):
         moment = pymunk.moment_for_circle(self.DRIVER_MASS, 0, self.DRIVER_RADIUS)
-        self.driver_body = pymunk.Body(self.DRIVER_MASS, moment)
-        self.driver_shape = pymunk.Circle(self.driver_body, self.DRIVER_RADIUS)
-        self.driver_shape.friction = self.DRIVER_FRICTION
-        self.driver_body.position = self.start_pos + self.DRIVER_POS
-        self.driver_shape.filter = self.filter_group
-        self.driver_shape.collision_type = self.DRIVER_COLLISION_TYPE
-        self.space.add(self.driver_body, self.driver_shape)
+        self.driver_head_body = pymunk.Body(self.DRIVER_MASS, moment)
+        self.driver_head_shape = pymunk.Circle(
+            self.driver_head_body, self.DRIVER_RADIUS
+        )
+        self.driver_head_shape.friction = self.DRIVER_FRICTION
+        self.driver_head_body.position = self.start_pos + self.DRIVER_POS
+        self.driver_head_shape.filter = self.filter_group
+        self.driver_head_shape.collision_type = self.DRIVER_COLLISION_TYPE
+        self.space.add(self.driver_head_body, self.driver_head_shape)
 
     def create_frame_joints(self):
         self.frame_joints = [
@@ -137,23 +139,23 @@ class Bike:
         self.space.add(*self.frame_joints)
 
     def create_driver_joints(self):
-        self.driver_joints = [
+        self.driver_head_joints = [
             # Frame to driver left
             pymunk.PinJoint(
                 self.frame_body,
-                self.driver_body,
+                self.driver_head_body,
                 (-50, 0),
                 (0, 0),
             ),
             # Frame to driver right
             pymunk.PinJoint(
                 self.frame_body,
-                self.driver_body,
+                self.driver_head_body,
                 (50, 0),
                 (0, 0),
             ),
         ]
-        self.space.add(*self.driver_joints)
+        self.space.add(*self.driver_head_joints)
 
     def remove(self):
         self.space.remove(
@@ -161,10 +163,10 @@ class Bike:
             *self.wheels_shape,
             self.frame_body,
             self.frame_shape,
-            self.driver_body,
-            self.driver_shape,
+            self.driver_head_body,
+            self.driver_head_shape,
             *self.frame_joints,
-            *self.driver_joints,
+            *self.driver_head_joints,
         )
 
     def update(self, game, delta_t):
@@ -212,19 +214,19 @@ class Bike:
             l = self.driver_lean
 
         if l > 0.0:
-            self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L - l * 1.0
-            self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 36.0
+            self.driver_head_joints[0].distance = self.DRIVER_JOINT_DIST_L - l * 1.0
+            self.driver_head_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 36.0
             # Bike tilting to make it easier to counter back flipping (e.g. in
             # wheelie or in air)
             if self.wheel_r_coll == 0:  # only when front wheel doesn't touch ground
                 self.tilt(10.0)
         elif l < 0.0:
-            self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L + l * 22.0
-            self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 2.0
+            self.driver_head_joints[0].distance = self.DRIVER_JOINT_DIST_L + l * 22.0
+            self.driver_head_joints[1].distance = self.DRIVER_JOINT_DIST_R - l * 2.0
             self.tilt(-10.0)
         else:
-            self.driver_joints[0].distance = self.DRIVER_JOINT_DIST_L
-            self.driver_joints[1].distance = self.DRIVER_JOINT_DIST_R
+            self.driver_head_joints[0].distance = self.DRIVER_JOINT_DIST_L
+            self.driver_head_joints[1].distance = self.DRIVER_JOINT_DIST_R
 
     def check_joint_break(self, delta_t):
         for joint in self.frame_joints:
@@ -268,7 +270,7 @@ class Bike:
         wheels_right = map(
             lambda w: w.position[0] + self.WHEEL_RADIUS, self.wheels_body
         )
-        driver_right = self.driver_body.position[0] + self.DRIVER_RADIUS
+        driver_right = self.driver_head_body.position[0] + self.DRIVER_RADIUS
         return max((*wheels_right, driver_right))
 
     def on_wheel_r_ground_collision_begin(self):

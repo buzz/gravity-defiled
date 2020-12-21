@@ -4,7 +4,7 @@ import pyglet
 from pygd.bike import Bike
 from pygd.input import UserControl
 from pygd.menu import MenuManager
-from pygd.window import DebugWindow, MainWindow
+from pygd.graphics import DebugWindow, MainWindow
 from pygd.track import TrackManager, Track
 
 
