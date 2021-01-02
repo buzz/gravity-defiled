@@ -22,7 +22,7 @@ class Track:
     @property
     def start_line(self):
         if not self._start_line:
-            bike_right = self.start[0] + Bike.WHEEL_R_POS[0] + Bike.WHEEL_RADIUS
+            bike_right = self.start[0] + Bike.WHEEL_R_POS[0] + Bike.WHEEL_R_RADIUS
             self._start_line = self.find_point_to_the_right(bike_right)
         return self._start_line
 

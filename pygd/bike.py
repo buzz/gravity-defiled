@@ -5,21 +5,23 @@ from pymunk.vec2d import Vec2d
 
 
 class Bike:
-    JOINT_BREAK_THRESHOLD = 700000
+    JOINT_BREAK_THRESHOLD = 500000
     ACCEL_ANG_VEL = 2.0
     MAX_ANG_VEL = 20.0
     BRAKE_FACTOR = 0.4
     LEAN_SPEED_FORWARD = 0.4
     LEAN_SPEED_BACKWARD = 0.05
 
-    WHEEL_RADIUS = 20.5
-    WHEEL_RADIUS_INNER = 14.1
     WHEEL_FRICTION = 3.4
     WHEEL_ELASTICITY = 0.5
 
+    WHEEL_L_RADIUS = 19.87
+    WHEEL_L_RADIUS_INNER = 13.25
     WHEEL_L_POS = Vec2d(-34.0, 6.0)
     WHEEL_L_MASS = 20
 
+    WHEEL_R_RADIUS = 20.5
+    WHEEL_R_RADIUS_INNER = 14.67
     WHEEL_R_POS = Vec2d(41.0, 6.0)
     WHEEL_R_MASS = 8
     WHEEL_R_COLLISION_TYPE = 1
@@ -27,9 +29,13 @@ class Bike:
     FRAME_FRICTION = 0.1
     FRAME_MASS = 10
     FRAME_POINTS = (
-        Vec2d(31, -36),
-        Vec2d(10, 3.55),
-        Vec2d(-18, 0.55),
+        #      A
+        #    / |
+        #   /  |
+        #  C___B
+        Vec2d(31, -36),  # A
+        Vec2d(16, -2),  # B
+        Vec2d(-18, -5),  # C
     )
 
     DRIVER_RADIUS = 11
@@ -66,15 +72,23 @@ class Bike:
         self.create_driver_joints()
 
     def create_wheels(self):
-        for (pos, mass) in (
-            (self.WHEEL_L_POS, self.WHEEL_L_MASS),
-            (self.WHEEL_R_POS, self.WHEEL_R_MASS),
+        for (radius, radius_inner, pos, mass) in (
+            (
+                self.WHEEL_L_RADIUS,
+                self.WHEEL_L_RADIUS_INNER,
+                self.WHEEL_L_POS,
+                self.WHEEL_L_MASS,
+            ),
+            (
+                self.WHEEL_R_RADIUS,
+                self.WHEEL_R_RADIUS_INNER,
+                self.WHEEL_R_POS,
+                self.WHEEL_R_MASS,
+            ),
         ):
-            moment = pymunk.moment_for_circle(
-                mass, self.WHEEL_RADIUS_INNER, self.WHEEL_RADIUS
-            )
+            moment = pymunk.moment_for_circle(mass, radius_inner, radius)
             wheel_body = pymunk.Body(mass, moment)
-            wheel_shape = pymunk.Circle(wheel_body, self.WHEEL_RADIUS)
+            wheel_shape = pymunk.Circle(wheel_body, radius)
             wheel_shape.friction = self.WHEEL_FRICTION
             wheel_shape.elasticity = self.WHEEL_ELASTICITY
             wheel_body.position = self.start_pos + pos
@@ -125,10 +139,10 @@ class Bike:
             ),
             # Right wheel to top frame
             pymunk.SlideJoint(
-                self.wheels_body[1], self.frame_body, (0, 0), (26.5, -25.0), 31, 40
+                self.wheels_body[1], self.frame_body, (0, 0), (31.0, -35.0), 32, 36
             ),
             pymunk.DampedSpring(
-                self.wheels_body[1], self.frame_body, (0, 0), (26.5, -25.0), 45, 120, 30
+                self.wheels_body[1], self.frame_body, (0, 0), (31.0, -35.0), 33, 120, 30
             ),
             # Left to right wheel, only min distance important here, so bike can't
             # fold into itself
@@ -267,11 +281,10 @@ class Bike:
     @property
     def bike_right(self):
         """The outmost right edge x coord."""
-        wheels_right = map(
-            lambda w: w.position[0] + self.WHEEL_RADIUS, self.wheels_body
-        )
+        wheel_l_right = self.wheels_body[0].position[0] + self.WHEEL_L_RADIUS
+        wheel_r_right = self.wheels_body[1].position[0] + self.WHEEL_R_RADIUS
         driver_right = self.driver_head_body.position[0] + self.DRIVER_RADIUS
-        return max((*wheels_right, driver_right))
+        return max((wheel_r_right, wheel_l_right, driver_right))
 
     def on_wheel_r_ground_collision_begin(self):
         self.wheel_r_coll += 1
