@@ -16,14 +16,14 @@ class Bike:
         # Wheel sprites
         self.sprites_wheel = []
         wheel_l_sprite = pyglet.sprite.Sprite(
-            self.img_wheel, batch=batch, group=group, usage="stream"
+            self.img_wheel_l, batch=batch, group=group, usage="stream"
         )
-        wheel_l_sprite.scale = PhysicsBike.WHEEL_L_RADIUS / (self.img_wheel.width / 2)
+        wheel_l_sprite.scale = PhysicsBike.WHEEL_L_RADIUS / (self.img_wheel_l.width / 2)
         self.sprites_wheel.append(wheel_l_sprite)
         wheel_r_sprite = pyglet.sprite.Sprite(
-            self.img_wheel, batch=batch, group=group, usage="stream"
+            self.img_wheel_r, batch=batch, group=group, usage="stream"
         )
-        wheel_r_sprite.scale = PhysicsBike.WHEEL_R_RADIUS / (self.img_wheel.width / 2)
+        wheel_r_sprite.scale = PhysicsBike.WHEEL_R_RADIUS / (self.img_wheel_r.width / 2)
         self.sprites_wheel.append(wheel_r_sprite)
 
         # Frame sprite
@@ -34,15 +34,15 @@ class Bike:
         self.sprite_frame.scale_x = -1.0
 
         # Bike frame (pymunk)
-        self.bike_frame_lines_pymunk = PolyLine(
-            [(0.0, 0.0) for _ in PhysicsBike.FRAME_POINTS],
-            close=True,
-            color=self.COLOR_BIKE_FRAME,
-            width=self.LINE_WIDTH_BIKE_FRAME,
-            batch=batch,
-            group=group,
-            vertex_usage="stream",
-        )
+        # self.bike_frame_lines_pymunk = PolyLine(
+        #     [(0.0, 0.0) for _ in PhysicsBike.FRAME_POINTS],
+        #     close=True,
+        #     color=self.COLOR_BIKE_FRAME,
+        #     width=self.LINE_WIDTH_BIKE_FRAME,
+        #     batch=batch,
+        #     group=group,
+        #     vertex_usage="stream",
+        # )
 
         # Driver head
         self.driver_head = pyglet.shapes.Circle(
@@ -67,9 +67,13 @@ class Bike:
         self.img_frame.anchor_x = 58.0
         self.img_frame.anchor_y = 8.0
 
-        self.img_wheel = pyglet.resource.image("wheel.png")
-        self.img_wheel.anchor_x = self.img_wheel.width // 2
-        self.img_wheel.anchor_y = self.img_wheel.height // 2
+        self.img_wheel_l = pyglet.resource.image("wheel_l.png")
+        self.img_wheel_l.anchor_x = self.img_wheel_l.width // 2
+        self.img_wheel_l.anchor_y = self.img_wheel_l.height // 2
+
+        self.img_wheel_r = pyglet.resource.image("wheel_r.png")
+        self.img_wheel_r.anchor_x = self.img_wheel_r.width // 2
+        self.img_wheel_r.anchor_y = self.img_wheel_r.height // 2
 
     def update(self, game):
         # Wheels
@@ -87,9 +91,9 @@ class Bike:
             (v.rotated(frame_body.angle) + frame_body.position)
             for v in frame_shape.get_vertices()
         ]
-        bike_frame_rot = frame_body.angle
 
         # Bike frame (sprite)
+        bike_frame_rot = frame_body.angle
         self.sprite_frame.update(
             x=bike_frame_points_pymunk[0].x,
             y=bike_frame_points_pymunk[0].y,
@@ -97,7 +101,12 @@ class Bike:
         )
 
         # Bike frame (pymunk)
-        self.bike_frame_lines_pymunk.update(bike_frame_points_pymunk)
+        # bike_frame_points_pymunk = [
+        #     # Local to world coords
+        #     (v.rotated(frame_body.angle) + frame_body.position)
+        #     for v in frame_shape.get_vertices()
+        # ]
+        # self.bike_frame_lines_pymunk.update(bike_frame_points_pymunk)
 
         # Driver head
         head_pos = game.bike.driver_head_body.position
