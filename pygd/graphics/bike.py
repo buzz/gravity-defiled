@@ -62,6 +62,13 @@ class Bike:
             vertex_usage="stream",
         )
 
+        # Driver leg sprite
+        # self.sprite_driver_leg = pyglet.sprite.Sprite(
+        #     self.img_driver_leg, batch=batch, group=group, usage="stream"
+        # )
+        # self.sprite_driver_leg.scale = 0.135
+        # self.sprite_driver_leg.scale_y = -1.0
+
     def load_images(self):
         self.img_frame = pyglet.resource.image("frame.png")
         self.img_frame.anchor_x = 58.0
@@ -74,6 +81,10 @@ class Bike:
         self.img_wheel_r = pyglet.resource.image("wheel_r.png")
         self.img_wheel_r.anchor_x = self.img_wheel_r.width // 2
         self.img_wheel_r.anchor_y = self.img_wheel_r.height // 2
+
+        self.img_driver_leg = pyglet.resource.image("driver_leg.png")
+        self.img_driver_leg.anchor_x = 0.0
+        self.img_driver_leg.anchor_y = 0.0
 
     def update(self, game):
         # Wheels
@@ -118,5 +129,9 @@ class Bike:
         )
 
     def update_body(self, head_pos, footpeg_pos, handle_pos):
-        # print(head_pos, handle_pos, footpeg_pos)
+        # Driver body lines
         self.driver_body.update((footpeg_pos, head_pos, handle_pos))
+
+        # Driver leg sprite
+        # rot = 0
+        # self.sprite_driver_leg.update(x=footpeg_pos.x, y=footpeg_pos.y, rotation=rot)

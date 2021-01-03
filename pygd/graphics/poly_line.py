@@ -28,7 +28,6 @@ class PolyLine:
             f"v2f/{vertex_usage}",
             "c3B/static",
         )
-        self.update(vertices)
 
     def draw(self):
         self._vertex_list.draw(self._draw_mode)
