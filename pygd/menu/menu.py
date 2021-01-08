@@ -41,7 +41,7 @@ class MenuItem:
 
 
 class Menu:
-    def __init__(self, game, title):
+    def __init__(self, game, title=""):
         self.game = game
         self.selected_idx = 0
         self.items = []
@@ -85,6 +85,9 @@ class Menu:
             self.items[self.selected_idx].set_selected(False)
             self.selected_idx = idx
             self.items[self.selected_idx].set_selected(True)
+
+    def set_title(self, title):
+        self.title_text.text = title
 
     # Events
 
