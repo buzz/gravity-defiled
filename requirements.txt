@@ -1,2 +1,2 @@
-pyglet==1.5.11
+pyglet==1.5.13
 pymunk==6.0.0
