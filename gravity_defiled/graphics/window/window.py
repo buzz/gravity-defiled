@@ -1,10 +1,10 @@
 import pyglet
 import pyglet.gl as gl
 
-from pygd.graphics.bike import Bike
-from pygd.graphics.track import Track
-from pygd.graphics.window.base import BaseWindow
-from pygd.menu import FONT_COLOR, FONT_NAME, FONT_SIZE_BIG
+from gravity_defiled.graphics.bike import Bike
+from gravity_defiled.graphics.track import Track
+from gravity_defiled.graphics.window.base import BaseWindow
+from gravity_defiled.menu import FONT_COLOR, FONT_NAME, FONT_SIZE_BIG
 
 GL_CONFIG = {
     "alpha_size": 8,

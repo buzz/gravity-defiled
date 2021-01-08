@@ -1,6 +1,6 @@
 from pyglet.window import Window
 
-from pygd.graphics.groups import PymunkCoordsGroup, WorldCameraGroup
+from gravity_defiled.graphics.groups import PymunkCoordsGroup, WorldCameraGroup
 
 
 class BaseWindow(Window):

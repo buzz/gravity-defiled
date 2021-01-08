@@ -11,7 +11,7 @@ import os
 
 from pymunk.vec2d import Vec2d
 
-from pygd.track import Track
+from gravity_defiled.track import Track
 
 
 class MrgHeader:

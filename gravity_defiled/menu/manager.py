@@ -1,10 +1,10 @@
 from pyglet import resource
 
-from pygd.menu.game_end_menu import GameEndMenu
-from pygd.menu.levels_menu import LevelsMenu
-from pygd.menu.main_menu import MainMenu
-from pygd.menu.pause_menu import PauseMenu
-from pygd.menu.play_menu import PlayMenu
+from gravity_defiled.menu.game_end_menu import GameEndMenu
+from gravity_defiled.menu.levels_menu import LevelsMenu
+from gravity_defiled.menu.main_menu import MainMenu
+from gravity_defiled.menu.pause_menu import PauseMenu
+from gravity_defiled.menu.play_menu import PlayMenu
 
 
 MENUS = {

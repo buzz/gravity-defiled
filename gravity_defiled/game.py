@@ -1,14 +1,14 @@
 import pymunk
 import pyglet
 
-from pygd.bike import Bike
-from pygd.input import UserControl
-from pygd.menu import MenuManager
-from pygd.graphics import DebugWindow, MainWindow
-from pygd.track import TrackManager, Track
+from gravity_defiled.bike import Bike
+from gravity_defiled.input import UserControl
+from gravity_defiled.menu import MenuManager
+from gravity_defiled.graphics import DebugWindow, MainWindow
+from gravity_defiled.track import TrackManager, Track
 
 
-class PyGd:
+class Game:
     FPS = 60
     DAMPING = 0.95
     GRAVITY = (0.0, 450.0)

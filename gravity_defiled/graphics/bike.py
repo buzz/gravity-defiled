@@ -1,8 +1,8 @@
 import math
 import pyglet
 
-from pygd.bike import Bike as PhysicsBike
-from pygd.graphics.poly_line import PolyLine
+from gravity_defiled.bike import Bike as PhysicsBike
+from gravity_defiled.graphics.poly_line import PolyLine
 
 
 class Bike:

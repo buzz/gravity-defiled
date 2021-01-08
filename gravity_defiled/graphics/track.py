@@ -1,6 +1,6 @@
 import pyglet
 
-from pygd.graphics.poly_line import PolyLine
+from gravity_defiled.graphics.poly_line import PolyLine
 
 
 class Track:

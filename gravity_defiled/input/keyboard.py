@@ -1,6 +1,6 @@
 from pyglet.window import key
 
-from pygd.input.base import BaseInput
+from gravity_defiled.input.base import BaseInput
 
 
 class KeyboardInput(BaseInput):

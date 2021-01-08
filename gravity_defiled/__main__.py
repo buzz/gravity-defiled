@@ -1,6 +1,6 @@
 import argparse
 
-from pygd.game import PyGd
+from gravity_defiled.game import Game
 
 
 def main():
@@ -12,8 +12,8 @@ def main():
     )
     args = vars(parser.parse_args())
 
-    pygd = PyGd(**args)
-    pygd.run()
+    gravity_defiled = Game(**args)
+    gravity_defiled.run()
 
 
 main()

@@ -1,6 +1,6 @@
 from pyglet.input import get_joysticks
 
-from pygd.input.base import BaseInput
+from gravity_defiled.input.base import BaseInput
 
 # XBOX generic
 # Stick   L x gamepad.x    lean

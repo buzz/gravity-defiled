@@ -1,7 +1,7 @@
 from pyglet.window import FPSDisplay
 import pymunk.pyglet_util
 
-from pygd.graphics.window.base import BaseWindow
+from gravity_defiled.graphics.window.base import BaseWindow
 
 
 class DebugWindow(BaseWindow):

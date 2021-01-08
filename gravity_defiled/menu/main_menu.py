@@ -1,4 +1,4 @@
-from pygd.menu.menu import Menu
+from gravity_defiled.menu.menu import Menu
 
 
 class MainMenu(Menu):

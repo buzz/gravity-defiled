@@ -1,4 +1,4 @@
-from pygd.bike import Bike
+from gravity_defiled.bike import Bike
 
 
 class Track:

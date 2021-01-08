@@ -1,7 +1,7 @@
 from pyglet.event import EventDispatcher
 
-from pygd.input.gamepad import GamepadInput
-from pygd.input.keyboard import KeyboardInput
+from gravity_defiled.input.gamepad import GamepadInput
+from gravity_defiled.input.keyboard import KeyboardInput
 
 
 class UserControl(EventDispatcher):

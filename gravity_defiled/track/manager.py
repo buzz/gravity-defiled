@@ -1,7 +1,7 @@
 import pymunk
 
-from pygd.track import Track
-from pygd.track.mrg import MrgFile
+from gravity_defiled.track import Track
+from gravity_defiled.track.mrg import MrgFile
 
 
 class TrackManager:
