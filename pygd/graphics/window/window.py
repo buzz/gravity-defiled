@@ -11,7 +11,7 @@ GL_CONFIG = {
     "depth_size": 0,
     "double_buffer": True,
     "sample_buffers": 1,
-    "samples": 8,
+    "samples": 3,
 }
 
 
